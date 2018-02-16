@@ -1,5 +1,4 @@
 #Import packages
-library(ggplot2)
 library(readxl)
 library(broom)
 
@@ -61,5 +60,3 @@ write.csv(tidy_Leader, "tidy_Leader.csv")
 State <- summary(lm(StateComp ~ Tenure.f + Union.f + Race.f + Sex.f + Agency.f, data = df))
 tidy_State <- tidy(State)
 write.csv(tidy_State, "tidy_State.csv")
-
-
