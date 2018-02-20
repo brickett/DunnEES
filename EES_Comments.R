@@ -32,7 +32,7 @@ names <- c("Abraham Lincoln Presidential Library and Museum","Aging, Department 
            "Student Assistance Commission, Illinois","Toll Highway Authority, Illinois State","Transportation, Department of","Veterans Affairs, Department of",
            "Volunteerism Community Service, Governor's Commission on","Workers' Compensation Commission, Illinois")
 abbrevs <- c("ALPLM","AGE","AG","AC","CDB","CMS","DCFS","CSC","DCEO","ICC","ICCB","DOC","ICJIA","DHHC","CDD","ISBE","ELRB","IEMA","IDES","IEPA","IDFPR","GAM","GAC",
-             "HFS","IBHE","HRC","DHS","DHR","DoIT","DOI","DJJ","ILRB","DOL","LETSB","LCC","LOT","GOMB","MDC","IDNR","Other","PCB","IPA","PRB","PTAB","DPH","IRB","REV","OSFM","ISP","SRS",
+             "HFS","IBHE","HRC","DHR","DHS","DoIT","DOI","DJJ","ILRB","DOL","LETSB","LCC","LOT","GOMB","MDC","IDNR","Other","PCB","IPA","PRB","PTAB","DPH","IRB","REV","OSFM","ISP","SRS",
              "ISAC","TOL","DOT","VA","CVCS","WCC")
 Xagency <- tibble(names, abbrevs)
 
@@ -41,25 +41,37 @@ questions <- (c(colnames(df)[3:9]))
 #Initialize
 j <- 1 #counter for stepping through the list of agencies 
 last <- 1 #bookmark for the beginning of comments
+fileend = "EES2017"
 filext = ".xlsx" #end of file name
 sheet = colnames(df)[3:9] #set of the column names in the dataset, to be used as excel sheet names
-done = FALSE
 
 #file creation script
 for (i in 1:nrow(df)){ #step through each survey response
-  if (i=nrow(df)){
-    done=TRUE
-  }
-  while (df[i,1]!=Xagency[j,1] || done=TRUE) { #creates the file when the agency name changes
+  while (df[i,1]!=Xagency[j,1]) { #creates the file when the agency name changes
     comms = df[last:i-1,3:9]
-    filename=paste(Xagency[j,2],"EES2017",sep="_") #uses the short abbrev for the file name
-    print(filename)
-    last=i #sets a new bookmark for the beginning of a new agency's comments
+    filename=paste(Xagency[j,2],fileend,sep="_") #uses the short abbrev for the file name
+    for (k in 1:length(sheet)){
+      if (sum(is.na(comms[,k]))==nrow(comms[,k])){
+        sheetvals <- data.frame("No Comments Submitted")
+      } else {
+        sheetvals <- na.omit(comms[,k])
+      }
+      write.xlsx(sheetvals, file=paste(filename,filext, sep = "" ),
+                 sheetName=sheet[k], append=TRUE, col.names = FALSE)
+    }
+    last=i+1 #sets a new bookmark for the beginning of a new agency's comments
     j <- j+1 #steps to the next agency
   }
 }
 
+comms = df[last:i,3:9]
+filename=paste(Xagency[j,2],fileend,sep="_") #uses the short abbrev for the file name
 for (k in 1:length(sheet)){
-  write.xlsx(na.omit(comms[,k]), file=paste(filename,filext, sep = "" ),
+  if (sum(is.na(comms[,k]))==nrow(comms[,k])){
+    sheetvals <- data.frame("No Comments Submitted")
+  } else {
+    sheetvals <- na.omit(comms[,k])
+  }
+  write.xlsx(sheetvals, file=paste(filename,filext, sep = "" ),
              sheetName=sheet[k], append=TRUE, col.names = FALSE)
 }
