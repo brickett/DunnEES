@@ -36,7 +36,7 @@ abbrevs <- c("ALPLM","AGE","AG","AC","CDB","CMS","DCFS","CSC","DCEO","ICC","ICCB
              "ISAC","TOL","DOT","VA","CVCS","WCC")
 Xagency <- tibble(names, abbrevs)
 
-questions <- (c(colnames(df)[3:9]))
+questions <- tibble("Is there a feasible, low-cost change your agency could implement to improve employee retention among your co-workers?","Is there a feasible, low-cost change your agency could implement to improve job satisfaction among your co-workers?","What training or development opportunities would most improve your co-worker's performance?","Is there a feasible, low-cost change your agency could implement to improve your work environment?","What could be done to make the evaluation process more fair for your co-workers?", "If you could provide one piece of advice to your agency's director, what would it be?","The state's fiscal situation has limited its ability to issue raises for many employees. What non-monetary rewards could state agencies employ to improve employee compensation?")
 
 #Initialize
 j <- 1 #counter for stepping through the list of agencies 
@@ -56,8 +56,9 @@ for (i in 1:nrow(df)){ #step through each survey response
       } else {
         sheetvals <- na.omit(comms[,k])
       }
+      colnames(sheetvals) <- questions[k]
       write.xlsx(sheetvals, file=paste(filename,filext, sep = "" ),
-                 sheetName=sheet[k], append=TRUE, col.names = FALSE)
+                 sheetName=sheet[k], append=TRUE, col.names = TRUE)
     }
     last=i+1 #sets a new bookmark for the beginning of a new agency's comments
     j <- j+1 #steps to the next agency
@@ -72,6 +73,7 @@ for (k in 1:length(sheet)){
   } else {
     sheetvals <- na.omit(comms[,k])
   }
+  colnames(sheetvals) <- questions[k]
   write.xlsx(sheetvals, file=paste(filename,filext, sep = "" ),
              sheetName=sheet[k], append=TRUE, col.names = FALSE)
 }
