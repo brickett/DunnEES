@@ -44,11 +44,9 @@ for (i in 1:nrow(df)){ #step through each survey response
   while (df[i,1]!=Xagency[j,1]) { #creates the file when the agency name changes
     responses = df[last:i-1,3:11]
     filename=paste(Xagency[j,2],fileend,sep="_") #uses the short abbrev for the file name
-
-    }
-    last=i+1 #sets a new bookmark for the beginning of a new agency's comments
-    j <- j+1 #steps to the next agency
   }
+  last=i+1 #sets a new bookmark for the beginning of a new agency's comments
+  j <- j+1 #steps to the next agency
 }
 
 comms = df[last:i,3:9]
