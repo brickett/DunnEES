@@ -13,7 +13,54 @@ setwd("C:/Users/bjr21/Documents/GitHub/DunnEES")
 years <- c("2015","2016","2017")
 
 #Import file
-df <- read_excel("2017EESStatsData.xlsx", sheet=2)
+df_2017 <- read_excel("2017EESStatsData.xlsx", sheet=1)
+df_2016 <- read_excel("2016EESStats.xlsx", sheet=4)
+df_2015 <- read_excel("2015EESStats.xlsx", sheet=2)
+
+#Clean & combine
+keeps_2017 <- c("SurveyYear", "Sex", "Race", "Tenure", "Union", "Agency", "RetentionComp", "TalentComp", "EnviroComp", "EvalComp", "CustomerComp", "UnitComp", "SuperComp", "LeaderComp", "StateComp")
+comps_2017 <- df_2017[keeps_2017]
+comps_2017 <- comps_2017[rowSums(is.na(comps_2017))!=ncol(comps_2017), ]
+
+names(df_2016)[2] <- "Sex"
+names(df_2016)[3] <- "Race"
+names(df_2016)[4] <- "OtherRace"
+names(df_2016)[5] <- "Tenure"
+names(df_2016)[6] <- "Union"
+names(df_2016)[7] <- "Agency"
+names(df_2016)[8] <- "OtherAgency"
+names(df_2016)[130] <- "RetentionComp"
+names(df_2016)[135] <- "TalentComp"
+names(df_2016)[144] <- "EnviroComp"
+names(df_2016)[153] <- "EvalComp"
+names(df_2016)[159] <- "CustomerComp"
+names(df_2016)[166] <- "UnitComp"
+names(df_2016)[173] <- "SuperComp"
+names(df_2016)[181] <- "LeaderComp"
+names(df_2016)[182] <- "StateComp"
+keeps_2016 <- c("SurveyYear", "Sex", "Race", "Tenure", "Union", "Agency", "RetentionComp", "TalentComp", "EnviroComp", "EvalComp", "CustomerComp", "UnitComp", "SuperComp", "LeaderComp", "StateComp")
+comps_2016 <- df_2016[keeps_2016]
+comps_2016 <- comps_2016[rowSums(is.na(comps_2016))!=ncol(comps_2016), ]
+
+names(df_2015)[2] <- "Sex"
+names(df_2015)[3] <- "Race"
+names(df_2015)[4] <- "Tenure"
+names(df_2015)[6] <- "Union"
+names(df_2015)[7] <- "Agency"
+names(df_2015)[126] <- "RetentionComp"
+names(df_2015)[131] <- "TalentComp"
+names(df_2015)[140] <- "EnviroComp"
+names(df_2015)[149] <- "EvalComp"
+names(df_2015)[155] <- "CustomerComp"
+names(df_2015)[162] <- "UnitComp"
+names(df_2015)[169] <- "SuperComp"
+names(df_2015)[177] <- "LeaderComp"
+names(df_2015)[179] <- "StateComp"
+keeps_2015 <- c("SurveyYear", "Sex", "Race", "Tenure", "Union", "Agency", "RetentionComp", "TalentComp", "EnviroComp", "EvalComp", "CustomerComp", "UnitComp", "SuperComp", "LeaderComp", "StateComp")
+comps_2015 <- df_2015[keeps_2015]
+comps_2015 <- comps_2015[rowSums(is.na(comps_2015))!=ncol(comps_2015), ]
+
+fullset <- rbind(comps_2015, comps_2016, comps_2017)
 
 #Make Agency a factor variable
 df$Agency.f <- factor(df$Agency)
@@ -38,26 +85,3 @@ abbrevs <- c("ALPLM","AGE","AG","AC","CDB","CMS","DCFS","CSC","DCEO","ICC","ICCB
              "HFS","IBHE","HRC","DHR","DHS","DoIT","DOI","DJJ","ILRB","DOL","LETSB","LCC","LOT","GOMB","MDC","IDNR","Other","PCB","IPA","PRB","PTAB","DPH","IRB","REV","OSFM","ISP","SRS",
              "ISAC","TOL","DOT","VA","CVCS","WCC")
 Xagency <- tibble(names, abbrevs)
-
-#dataframe creation script
-for (i in 1:nrow(df)){ #step through each survey response
-  while (df[i,1]!=Xagency[j,1]) { #creates the file when the agency name changes
-    responses = df[last:i-1,3:11]
-    filename=paste(Xagency[j,2],fileend,sep="_") #uses the short abbrev for the file name
-  }
-  last=i+1 #sets a new bookmark for the beginning of a new agency's comments
-  j <- j+1 #steps to the next agency
-}
-
-comms = df[last:i,3:9]
-filename=paste(Xagency[j,2],fileend,sep="_") #uses the short abbrev for the file name
-for (k in 1:length(sheet)){
-  if (sum(is.na(comms[,k]))==nrow(comms[,k])){
-    sheetvals <- data.frame("No Comments Submitted")
-  } else {
-    sheetvals <- na.omit(comms[,k])
-  }
-  colnames(sheetvals) <- questions[k]
-  write.xlsx(sheetvals, file=paste(filename,filext, sep = "" ),
-             sheetName=sheet[k], append=TRUE, col.names = FALSE)
-}
