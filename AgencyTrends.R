@@ -91,18 +91,22 @@ p_SOI_subset_only<- ggplot(SOI_subset_only, aes(x=variable, y=Mean, fill=SurveyY
                 position=position_dodge(.9))
 
 # Cleaned up bar plot
-p_SOI_subset_only+labs(title="Survey Section Composite Scores, Mean & 95% Confidence Interval", x="Survey Focus", y = "Average Composite Score")+theme_minimal()+scale_fill_discrete(name = "Survey Year") + scale_x_discrete(labels=c("Retention", "Talent Development", "Work Environment", "Performance Evaluation", "Customer Service", "Work Unit", "Supervisor", "Leadership"))  + 
+p_SOI_subset_only+labs(title="Survey Section Composite Scores, Mean & 95% Confidence Interval", x="Survey Focus", y = "Average Composite Score")+theme_minimal()+scale_fill_discrete(name = "Survey Year") + scale_x_discrete(labels=c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership"))  + 
   theme(axis.text.x=element_text(angle=30, hjust=1))
 
 print(p_SOI_subset_only)
+
+thing
 
 # Perform t-test
 #use Welch's two-sided test to control for unequal sample sizes
 delfull = subset(fullset,SurveyYear.f==2015 | SurveyYear.f==2017) #delta between start of survey and most recent year
 delrecent = subset(fullset,SurveyYear.f==2016 | SurveyYear.f==2017) #delta between last two runs of the survey
 
-full_ttest <- sapply(delfull[,7:15], function(i) t.test(i ~ delfull$SurveyYear.f))
-recent_ttest <- sapply(delrecent[,7:15], function(i) t.test(i ~ delrecent$SurveyYear.f))
+full_ttest <- lapply(delfull[,7:15], function(i) t.test(i ~ delfull$SurveyYear.f))
+recent_ttest <- lapply(delrecent[,7:15], function(i) t.test(i ~ delrecent$SurveyYear.f))
+
+#NEXT: calculate % change and display using https://stackoverflow.com/questions/18700938/ggplot2-positive-and-negative-values-different-color-gradient 
 
 
 #List of agency names and abbreviations, to be used in file creation.
