@@ -1,10 +1,9 @@
-#EES Comment Maker
+#EES Agency Trends
 
 #Import packages
 library(readxl)
 library(broom)
 library(tibble)
-library(xlsx)
 library(ggplot2)
 library(reshape2)
 
@@ -68,25 +67,33 @@ fullset$Race <- factor(fullset$Race)
 fullset$Tenure <- factor(fullset$Tenure)
 fullset$Union <- factor(fullset$Union)
 fullset$Agency <- factor(fullset$Agency)
+fullset$SurveyYear.f <- factor(fullset$SurveyYear)
 
 #Calculate aggregate statistics
-fullsetm <- melt(data=fullset, id.vars = c("SurveyYear", "Sex", "Race", "Tenure", "Union", "Agency"))
+fullsetm <- melt(data=fullset, id.vars = c("SurveyYear", "SurveyYear.f", "Sex", "Race", "Tenure", "Union", "Agency"))
 
-aggtest <- dcast(fullsetm, SurveyYear + variable ~ ., mean, na.rm=TRUE)
-aggtest2 <- dcast(fullsetm, SurveyYear + variable ~ ., sd, na.rm=TRUE)
+fullmean <- dcast(fullsetm, SurveyYear.f + variable ~ ., mean, na.rm=TRUE)
+fullsd <- dcast(fullsetm, SurveyYear.f + variable ~ ., sd, na.rm=TRUE)
 
+names(fullmean)[3] <- "Mean"
+names(fullsd)[3] <- "SD"
+
+SOI_results<- cbind(fullmean,fullsd$SD)
+names(SOI_results)[4] <- "SD"
+SOI_results <- na.omit(SOI_results)
+SOI_subset_only <-subset(SOI_results, variable!="StateComp")
 
 # Default bar plot
-p<- ggplot(df2, aes(x=dose, y=len, fill=supp)) + 
+p_SOI_subset_only<- ggplot(SOI_subset_only, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
   geom_bar(stat="identity", color="black", 
            position=position_dodge()) +
-  geom_errorbar(aes(ymin=len-sd, ymax=len+sd), width=.2,
+  geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
                 position=position_dodge(.9)) 
-print(p)
+
+print(p_SOI_subset_only)
+
 # Finished bar plot
-p+labs(title="Tooth length per dose", x="Dose (mg)", y = "Length")+
-  theme_classic() +
-  scale_fill_manual(values=c('#999999','#E69F00'))
+p_SOI_subset_only+labs(title="Survey Section Composite Scores, Mean & 95% Confidence Interval", x="Survey Focus", y = "Average Composite Score")+theme_minimal()+scale_fill_discrete(name = "Survey Year")
 
 #Make Agency a factor variable
 df$Agency.f <- factor(df$Agency)
