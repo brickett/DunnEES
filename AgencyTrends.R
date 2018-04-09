@@ -83,21 +83,27 @@ names(SOI_results)[4] <- "SD"
 SOI_results <- na.omit(SOI_results)
 SOI_subset_only <-subset(SOI_results, variable!="StateComp")
 
-# Default bar plot
+# Plot results - basic plot
 p_SOI_subset_only<- ggplot(SOI_subset_only, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
   geom_bar(stat="identity", color="black", 
            position=position_dodge()) +
   geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
-                position=position_dodge(.9)) 
+                position=position_dodge(.9))
+
+# Cleaned up bar plot
+p_SOI_subset_only+labs(title="Survey Section Composite Scores, Mean & 95% Confidence Interval", x="Survey Focus", y = "Average Composite Score")+theme_minimal()+scale_fill_discrete(name = "Survey Year") + scale_x_discrete(labels=c("Retention", "Talent Development", "Work Environment", "Performance Evaluation", "Customer Service", "Work Unit", "Supervisor", "Leadership"))  + 
+  theme(axis.text.x=element_text(angle=30, hjust=1))
 
 print(p_SOI_subset_only)
 
-# Finished bar plot
-p_SOI_subset_only+labs(title="Survey Section Composite Scores, Mean & 95% Confidence Interval", x="Survey Focus", y = "Average Composite Score")+theme_minimal()+scale_fill_discrete(name = "Survey Year")
+# Perform t-test
+#use Welch's two-sided test to control for unequal sample sizes
+delfull = subset(fullset,SurveyYear.f==2015 | SurveyYear.f==2017) #delta between start of survey and most recent year
+delrecent = subset(fullset,SurveyYear.f==2016 | SurveyYear.f==2017) #delta between last two runs of the survey
 
-#Make Agency a factor variable
-df$Agency.f <- factor(df$Agency)
-is.factor(df$Agency.f)
+full_ttest <- sapply(delfull[,7:15], function(i) t.test(i ~ delfull$SurveyYear.f))
+recent_ttest <- sapply(delrecent[,7:15], function(i) t.test(i ~ delrecent$SurveyYear.f))
+
 
 #List of agency names and abbreviations, to be used in file creation.
 names <- c("Abraham Lincoln Presidential Library and Museum","Aging, Department on","Agriculture, Department of","Arts Council","Capital Development Board",
