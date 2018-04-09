@@ -5,6 +5,8 @@ library(readxl)
 library(broom)
 library(tibble)
 library(xlsx)
+library(ggplot2)
+library(reshape2)
 
 #set directory to GitHub repo
 setwd("C:/Users/bjr21/Documents/GitHub/DunnEES")
@@ -61,6 +63,30 @@ comps_2015 <- df_2015[keeps_2015]
 comps_2015 <- comps_2015[rowSums(is.na(comps_2015))!=ncol(comps_2015), ]
 
 fullset <- rbind(comps_2015, comps_2016, comps_2017)
+fullset$Sex <- factor(fullset$Sex)
+fullset$Race <- factor(fullset$Race)
+fullset$Tenure <- factor(fullset$Tenure)
+fullset$Union <- factor(fullset$Union)
+fullset$Agency <- factor(fullset$Agency)
+
+#Calculate aggregate statistics
+fullsetm <- melt(data=fullset, id.vars = c("SurveyYear", "Sex", "Race", "Tenure", "Union", "Agency"))
+
+aggtest <- dcast(fullsetm, SurveyYear + variable ~ ., mean, na.rm=TRUE)
+aggtest2 <- dcast(fullsetm, SurveyYear + variable ~ ., sd, na.rm=TRUE)
+
+
+# Default bar plot
+p<- ggplot(df2, aes(x=dose, y=len, fill=supp)) + 
+  geom_bar(stat="identity", color="black", 
+           position=position_dodge()) +
+  geom_errorbar(aes(ymin=len-sd, ymax=len+sd), width=.2,
+                position=position_dodge(.9)) 
+print(p)
+# Finished bar plot
+p+labs(title="Tooth length per dose", x="Dose (mg)", y = "Length")+
+  theme_classic() +
+  scale_fill_manual(values=c('#999999','#E69F00'))
 
 #Make Agency a factor variable
 df$Agency.f <- factor(df$Agency)
