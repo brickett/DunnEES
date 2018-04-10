@@ -91,12 +91,12 @@ p_SOI_subset_only<- ggplot(SOI_subset_only, aes(x=variable, y=Mean, fill=SurveyY
                 position=position_dodge(.9))
 
 # Cleaned up bar plot
-p_SOI_subset_only+labs(title="Survey Section Composite Scores, Mean & 95% Confidence Interval", x="Survey Focus", y = "Average Composite Score")+theme_minimal()+scale_fill_discrete(name = "Survey Year") + scale_x_discrete(labels=c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership"))  + 
+p_SOI_subset_only+labs(title="Survey Section Composite Scores, Mean & 95% Confidence Interval", x="Survey Focus", y = "Average Composite Score")+
+  theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
+  scale_x_discrete(labels=c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership"))  + 
   theme(axis.text.x=element_text(angle=30, hjust=1))
 
 print(p_SOI_subset_only)
-
-thing
 
 # Perform t-test
 #use Welch's two-sided test to control for unequal sample sizes
@@ -107,6 +107,31 @@ full_ttest <- lapply(delfull[,7:15], function(i) t.test(i ~ delfull$SurveyYear.f
 recent_ttest <- lapply(delrecent[,7:15], function(i) t.test(i ~ delrecent$SurveyYear.f))
 
 #NEXT: calculate % change and display using https://stackoverflow.com/questions/18700938/ggplot2-positive-and-negative-values-different-color-gradient 
+PC_ful_ret <- (full_ttest$RetentionComp$estimate[2] - full_ttest$RetentionComp$estimate[1])/full_ttest$RetentionComp$estimate[1]*100
+PC_rec_ret <- (recent_ttest$RetentionComp$estimate[2] - recent_ttest$RetentionComp$estimate[1])/recent_ttest$RetentionComp$estimate[1]*100
+
+full_results_end <- c(full_ttest$RetentionComp$estimate[2], full_ttest$TalentComp$estimate[2], full_ttest$EnviroComp$estimate[2], full_ttest$EvalComp$estimate[2],
+                      full_ttest$CustomerComp$estimate[2], full_ttest$UnitComp$estimate[2], full_ttest$SuperComp$estimate[2], full_ttest$LeaderComp$estimate[2])
+full_results_beg <- c(full_ttest$RetentionComp$estimate[1], full_ttest$TalentComp$estimate[1], full_ttest$EnviroComp$estimate[1], full_ttest$EvalComp$estimate[1],
+                      full_ttest$CustomerComp$estimate[1], full_ttest$UnitComp$estimate[1], full_ttest$SuperComp$estimate[1], full_ttest$LeaderComp$estimate[1])
+
+rec_results_end <- c(recent_ttest$RetentionComp$estimate[2], recent_ttest$TalentComp$estimate[2], recent_ttest$EnviroComp$estimate[2], recent_ttest$EvalComp$estimate[2],
+                     recent_ttest$CustomerComp$estimate[2], recent_ttest$UnitComp$estimate[2], recent_ttest$SuperComp$estimate[2], recent_ttest$LeaderComp$estimate[2])
+rec_results_beg <- c(recent_ttest$RetentionComp$estimate[1], recent_ttest$TalentComp$estimate[1], recent_ttest$EnviroComp$estimate[1], recent_ttest$EvalComp$estimate[1],
+                     recent_ttest$CustomerComp$estimate[1], recent_ttest$UnitComp$estimate[1], recent_ttest$SuperComp$estimate[1], recent_ttest$LeaderComp$estimate[1])
+
+PC_full <- (full_results_end - full_results_beg)/full_results_beg
+names(PC_full) <- c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership")
+PC_rec <- (rec_results_end - rec_results_beg)/rec_results_beg
+names(PC_rec) <- c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership")
+
+#Plot % Change
+
+
+
+
+
+
 
 
 #List of agency names and abbreviations, to be used in file creation.
