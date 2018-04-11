@@ -6,6 +6,7 @@ library(broom)
 library(tibble)
 library(ggplot2)
 library(reshape2)
+library(scales)
 
 #set directory to GitHub repo
 setwd("C:/Users/bjr21/Documents/GitHub/DunnEES")
@@ -107,7 +108,7 @@ p_SOI_subset_only<- ggplot(SOI_subset_only, aes(x=variable, y=Mean, fill=SurveyY
                 position=position_dodge(.9))
 
 # Cleaned up bar plot
-p_SOI_subset_only+labs(title="Survey Section Composite Scores, Mean & 95% Confidence Interval", x="Survey Focus", y = "Average Composite Score")+
+p_SOI_subset_only <- p_SOI_subset_only+labs(title="Survey Section Composite Scores, Mean & 95% Confidence Interval", x="Survey Focus", y = "Average Composite Score")+
   theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
   scale_x_discrete(labels=c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership"))  + 
   theme(axis.text.x=element_text(angle=30, hjust=1))
@@ -116,31 +117,53 @@ print(p_SOI_subset_only)
 
 # Perform t-test
 #use Welch's two-sided test to control for unequal sample sizes
-delfull = subset(fullset,SurveyYear.f==2015 | SurveyYear.f==2017) #delta between start of survey and most recent year
-delrecent = subset(fullset,SurveyYear.f==2016 | SurveyYear.f==2017) #delta between last two runs of the survey
+delfull <- subset(fullset,SurveyYear.f==2015 | SurveyYear.f==2017) #delta between start of survey and most recent year
+delrecent <- subset(fullset,SurveyYear.f==2016 | SurveyYear.f==2017) #delta between last two runs of the survey
 
 full_ttest <- lapply(delfull[,7:15], function(i) t.test(i ~ delfull$SurveyYear.f))
 recent_ttest <- lapply(delrecent[,7:15], function(i) t.test(i ~ delrecent$SurveyYear.f))
 
 #NEXT: calculate % change and display using https://stackoverflow.com/questions/18700938/ggplot2-positive-and-negative-values-different-color-gradient 
 full_results_end <- c(full_ttest$RetentionComp$estimate[2], full_ttest$TalentComp$estimate[2], full_ttest$EnviroComp$estimate[2], full_ttest$EvalComp$estimate[2],
-                      full_ttest$CustomerComp$estimate[2], full_ttest$UnitComp$estimate[2], full_ttest$SuperComp$estimate[2], full_ttest$LeaderComp$estimate[2])
+                      full_ttest$CustomerComp$estimate[2], full_ttest$UnitComp$estimate[2], full_ttest$SuperComp$estimate[2], full_ttest$LeaderComp$estimate[2],
+                      full_ttest$StateComp$estimate[2])
 full_results_beg <- c(full_ttest$RetentionComp$estimate[1], full_ttest$TalentComp$estimate[1], full_ttest$EnviroComp$estimate[1], full_ttest$EvalComp$estimate[1],
-                      full_ttest$CustomerComp$estimate[1], full_ttest$UnitComp$estimate[1], full_ttest$SuperComp$estimate[1], full_ttest$LeaderComp$estimate[1])
+                      full_ttest$CustomerComp$estimate[1], full_ttest$UnitComp$estimate[1], full_ttest$SuperComp$estimate[1], full_ttest$LeaderComp$estimate[1],
+                      full_ttest$StateComp$estimate[1])
 
 rec_results_end <- c(recent_ttest$RetentionComp$estimate[2], recent_ttest$TalentComp$estimate[2], recent_ttest$EnviroComp$estimate[2], recent_ttest$EvalComp$estimate[2],
-                     recent_ttest$CustomerComp$estimate[2], recent_ttest$UnitComp$estimate[2], recent_ttest$SuperComp$estimate[2], recent_ttest$LeaderComp$estimate[2])
+                     recent_ttest$CustomerComp$estimate[2], recent_ttest$UnitComp$estimate[2], recent_ttest$SuperComp$estimate[2], recent_ttest$LeaderComp$estimate[2],
+                     recent_ttest$StateComp$estimate[2])
 rec_results_beg <- c(recent_ttest$RetentionComp$estimate[1], recent_ttest$TalentComp$estimate[1], recent_ttest$EnviroComp$estimate[1], recent_ttest$EvalComp$estimate[1],
-                     recent_ttest$CustomerComp$estimate[1], recent_ttest$UnitComp$estimate[1], recent_ttest$SuperComp$estimate[1], recent_ttest$LeaderComp$estimate[1])
+                     recent_ttest$CustomerComp$estimate[1], recent_ttest$UnitComp$estimate[1], recent_ttest$SuperComp$estimate[1], recent_ttest$LeaderComp$estimate[1],
+                     recent_ttest$StateComp$estimate[1])
 
 PC_full <- (full_results_end - full_results_beg)/full_results_beg
-names(PC_full) <- c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership")
+names(PC_full) <- c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership", "State Composite")
 PC_rec <- (rec_results_end - rec_results_beg)/rec_results_beg
-names(PC_rec) <- c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership")
+names(PC_rec) <- c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership", "State Composite")
 
+#create a plot
+PC_full_2plot <- data.frame(c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership", "State Composite"), unname(PC_full))
+names(PC_full_2plot) <- c("variable", "Change")
+#set variables in proper order for plotting
+PC_full_2plot$variable <- factor(PC_full_2plot$variable, levels = c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership", "State Composite"))
 
+p_PC_full <- ggplot(PC_full_2plot, mapping=aes(x=variable, y=Change, fill=Change)) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_gradient2(low = scales::muted("red"), mid = "white",
+                       high = scales::muted("green"), midpoint = 0, space = "Lab",
+                       na.value = "grey50", guide = "colourbar", labels = scales::percent) +
+  geom_bar(stat = 'identity', position = position_dodge())
 
+# Clean up plot
+p_PC_full <- p_PC_full+labs(title="% Change, 2015-2017", x="Survey Focus", y = "% Change")+
+  theme_minimal()+ 
+  theme(axis.text.x=element_text(angle=30, hjust=1))
 
+print(p_PC_full)
+
+###STILL NEED TO ANNOTATE w/ VALUE + SIGNIFICANCE###
 
 #List of agency names and abbreviations, to be used in file creation.
 names <- c("Abraham Lincoln Presidential Library and Museum","Aging, Department on","Agriculture, Department of","Arts Council","Capital Development Board",
