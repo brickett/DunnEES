@@ -14,11 +14,27 @@ setwd("C:/Users/bjr21/Documents/GitHub/DunnEES")
 years <- c("2015","2016","2017")
 
 #Import file
-df_2017 <- read_excel("2017EESStatsData.xlsx", sheet=1)
+df_2017 <- read_excel("2017EESStats.xlsx", sheet=3)
 df_2016 <- read_excel("2016EESStats.xlsx", sheet=4)
 df_2015 <- read_excel("2015EESStats.xlsx", sheet=2)
 
 #Clean & combine
+names(df_2017)[2] <- "Sex"
+names(df_2017)[3] <- "Race"
+names(df_2017)[4] <- "OtherRace"
+names(df_2017)[5] <- "Tenure"
+names(df_2017)[6] <- "Union"
+names(df_2017)[7] <- "Agency"
+names(df_2017)[8] <- "OtherAgency"
+names(df_2017)[136] <- "RetentionComp"
+names(df_2017)[141] <- "TalentComp"
+names(df_2017)[150] <- "EnviroComp"
+names(df_2017)[159] <- "EvalComp"
+names(df_2017)[165] <- "CustomerComp"
+names(df_2017)[172] <- "UnitComp"
+names(df_2017)[179] <- "SuperComp"
+names(df_2017)[187] <- "LeaderComp"
+names(df_2017)[188] <- "StateComp"
 keeps_2017 <- c("SurveyYear", "Sex", "Race", "Tenure", "Union", "Agency", "RetentionComp", "TalentComp", "EnviroComp", "EvalComp", "CustomerComp", "UnitComp", "SuperComp", "LeaderComp", "StateComp")
 comps_2017 <- df_2017[keeps_2017]
 comps_2017 <- comps_2017[rowSums(is.na(comps_2017))!=ncol(comps_2017), ]
@@ -107,9 +123,6 @@ full_ttest <- lapply(delfull[,7:15], function(i) t.test(i ~ delfull$SurveyYear.f
 recent_ttest <- lapply(delrecent[,7:15], function(i) t.test(i ~ delrecent$SurveyYear.f))
 
 #NEXT: calculate % change and display using https://stackoverflow.com/questions/18700938/ggplot2-positive-and-negative-values-different-color-gradient 
-PC_ful_ret <- (full_ttest$RetentionComp$estimate[2] - full_ttest$RetentionComp$estimate[1])/full_ttest$RetentionComp$estimate[1]*100
-PC_rec_ret <- (recent_ttest$RetentionComp$estimate[2] - recent_ttest$RetentionComp$estimate[1])/recent_ttest$RetentionComp$estimate[1]*100
-
 full_results_end <- c(full_ttest$RetentionComp$estimate[2], full_ttest$TalentComp$estimate[2], full_ttest$EnviroComp$estimate[2], full_ttest$EvalComp$estimate[2],
                       full_ttest$CustomerComp$estimate[2], full_ttest$UnitComp$estimate[2], full_ttest$SuperComp$estimate[2], full_ttest$LeaderComp$estimate[2])
 full_results_beg <- c(full_ttest$RetentionComp$estimate[1], full_ttest$TalentComp$estimate[1], full_ttest$EnviroComp$estimate[1], full_ttest$EvalComp$estimate[1],
@@ -124,11 +137,6 @@ PC_full <- (full_results_end - full_results_beg)/full_results_beg
 names(PC_full) <- c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership")
 PC_rec <- (rec_results_end - rec_results_beg)/rec_results_beg
 names(PC_rec) <- c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership")
-
-#Plot % Change
-
-
-
 
 
 
