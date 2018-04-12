@@ -143,9 +143,35 @@ names(PC_full) <- c("Retention & Satisfaction", "Talent Development", "Work Envi
 PC_rec <- (rec_results_end - rec_results_beg)/rec_results_beg
 names(PC_rec) <- c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership", "State Composite")
 
+full_results_pval <- c(full_ttest$RetentionComp$p.value, full_ttest$TalentComp$p.value, full_ttest$EnviroComp$p.value, full_ttest$EvalComp$p.value,
+                       full_ttest$CustomerComp$p.value, full_ttest$UnitComp$p.value, full_ttest$SuperComp$p.value, full_ttest$LeaderComp$p.value,
+                       full_ttest$StateComp$p.value)
+
+CInul_full <- full_results_pval>0.05
+CI95_full <- full_results_pval<=0.05 & full_results_pval>0.01
+CI99_full <- full_results_pval<=0.01
+
+full_results_pval <- replace(full_results_pval,CI99_full,"**")
+full_results_pval <- replace(full_results_pval,CI95_full,"*")
+full_results_pval <- replace(full_results_pval,CInul_full," ")
+
+rec_results_pval <- c(recent_ttest$RetentionComp$p.value, recent_ttest$TalentComp$p.value, recent_ttest$EnviroComp$p.value, recent_ttest$EvalComp$p.value,
+                       recent_ttest$CustomerComp$p.value, recent_ttest$UnitComp$p.value, recent_ttest$SuperComp$p.value, recent_ttest$LeaderComp$p.value,
+                       recent_ttest$StateComp$p.value)
+
+CInul_rec <- rec_results_pval>0.05
+CI95_rec <- rec_results_pval<=0.05 & rec_results_pval>0.01
+CI99_rec <- rec_results_pval<=0.01
+
+rec_results_pval <- replace(rec_results_pval,CI99_rec,"**")
+rec_results_pval <- replace(rec_results_pval,CI95_rec,"*")
+rec_results_pval <- replace(rec_results_pval,CInul_rec," ")
+
+##Timeframe of full survey
 #create a plot
-PC_full_2plot <- data.frame(c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership", "State Composite"), unname(PC_full))
-names(PC_full_2plot) <- c("variable", "Change")
+PC_full_2plot <- data.frame(c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership", "State Composite"), unname(PC_full),
+                            paste(round(unname(PC_full)*100,digits = 1),full_results_pval, sep = "%\n"))
+names(PC_full_2plot) <- c("variable", "Change", "sig")
 #set variables in proper order for plotting
 PC_full_2plot$variable <- factor(PC_full_2plot$variable, levels = c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership", "State Composite"))
 
@@ -154,7 +180,8 @@ p_PC_full <- ggplot(PC_full_2plot, mapping=aes(x=variable, y=Change, fill=Change
   scale_fill_gradient2(low = scales::muted("red"), mid = "white",
                        high = scales::muted("green"), midpoint = 0, space = "Lab",
                        na.value = "grey50", guide = "colourbar", labels = scales::percent) +
-  geom_bar(stat = 'identity', position = position_dodge())
+  geom_bar(stat = 'identity', position = position_dodge()) +
+  geom_label(aes(label=sig), position = position_stack(vjust = 0.5), label.padding = unit(0.1,"lines"), fill = "white")
 
 # Clean up plot
 p_PC_full <- p_PC_full+labs(title="% Change, 2015-2017", x="Survey Focus", y = "% Change")+
@@ -163,7 +190,28 @@ p_PC_full <- p_PC_full+labs(title="% Change, 2015-2017", x="Survey Focus", y = "
 
 print(p_PC_full)
 
-###STILL NEED TO ANNOTATE w/ VALUE + SIGNIFICANCE###
+##Timeframe of year-to-year change
+#create a plot
+PC_rec_2plot <- data.frame(c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership", "State Composite"), unname(PC_rec),
+                            paste(round(unname(PC_rec)*100,digits = 1),rec_results_pval, sep = "%\n"))
+names(PC_rec_2plot) <- c("variable", "Change", "sig")
+#set variables in proper order for plotting
+PC_rec_2plot$variable <- factor(PC_rec_2plot$variable, levels = c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership", "State Composite"))
+
+p_PC_rec <- ggplot(PC_rec_2plot, mapping=aes(x=variable, y=Change, fill=Change)) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_gradient2(low = scales::muted("red"), mid = "white",
+                       high = scales::muted("green"), midpoint = 0, space = "Lab",
+                       na.value = "grey50", guide = "colourbar", labels = scales::percent) +
+  geom_bar(stat = 'identity', position = position_dodge()) +
+  geom_label(aes(label=sig), position = position_stack(vjust = 0.5), label.padding = unit(0.1,"lines"), fill = "white")
+
+# Clean up plot
+p_PC_rec <- p_PC_rec+labs(title="% Change, 2015-2017", x="Survey Focus", y = "% Change")+
+  theme_minimal()+ 
+  theme(axis.text.x=element_text(angle=30, hjust=1))
+
+print(p_PC_rec)
 
 #List of agency names and abbreviations, to be used in file creation.
 names <- c("Abraham Lincoln Presidential Library and Museum","Aging, Department on","Agriculture, Department of","Arts Council","Capital Development Board",
