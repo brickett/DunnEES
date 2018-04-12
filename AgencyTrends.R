@@ -1,6 +1,7 @@
-#EES Agency Trends
+### EES Agency Trends ###
 
-#Import packages
+## Setup ##
+# Import packages
 library(readxl)
 library(broom)
 library(tibble)
@@ -8,18 +9,19 @@ library(ggplot2)
 library(reshape2)
 library(scales)
 
-#set directory to GitHub repo
+# set directory to GitHub repo
 setwd("C:/Users/bjr21/Documents/GitHub/DunnEES")
 
-#set number of years
+# set number of years
 years <- c("2015","2016","2017")
 
-#Import file
+
+## Import & clean files##
 df_2017 <- read_excel("2017EESStats.xlsx", sheet=3)
 df_2016 <- read_excel("2016EESStats.xlsx", sheet=4)
 df_2015 <- read_excel("2015EESStats.xlsx", sheet=2)
 
-#Clean & combine
+# Clean & combine
 names(df_2017)[2] <- "Sex"
 names(df_2017)[3] <- "Race"
 names(df_2017)[4] <- "OtherRace"
@@ -78,6 +80,8 @@ keeps_2015 <- c("SurveyYear", "Sex", "Race", "Tenure", "Union", "Agency", "Reten
 comps_2015 <- df_2015[keeps_2015]
 comps_2015 <- comps_2015[rowSums(is.na(comps_2015))!=ncol(comps_2015), ]
 
+
+# make into one large dataset
 fullset <- rbind(comps_2015, comps_2016, comps_2017)
 fullset$Sex <- factor(fullset$Sex)
 fullset$Race <- factor(fullset$Race)
@@ -86,7 +90,9 @@ fullset$Union <- factor(fullset$Union)
 fullset$Agency <- factor(fullset$Agency)
 fullset$SurveyYear.f <- factor(fullset$SurveyYear)
 
-#Calculate aggregate statistics
+
+## Survey Results Analysis ##
+# Calculate aggregate statistics
 fullsetm <- melt(data=fullset, id.vars = c("SurveyYear", "SurveyYear.f", "Sex", "Race", "Tenure", "Union", "Agency"))
 
 fullmean <- dcast(fullsetm, SurveyYear.f + variable ~ ., mean, na.rm=TRUE)
@@ -115,15 +121,17 @@ p_SOI_subset_only <- p_SOI_subset_only+labs(title="Survey Section Composite Scor
 
 print(p_SOI_subset_only)
 
+
+# Determine % change year to year, and whether it is statistically significant##
 # Perform t-test
-#use Welch's two-sided test to control for unequal sample sizes
+# use Welch's two-sided test to control for unequal sample sizes
 delfull <- subset(fullset,SurveyYear.f==2015 | SurveyYear.f==2017) #delta between start of survey and most recent year
 delrecent <- subset(fullset,SurveyYear.f==2016 | SurveyYear.f==2017) #delta between last two runs of the survey
 
 full_ttest <- lapply(delfull[,7:15], function(i) t.test(i ~ delfull$SurveyYear.f))
 recent_ttest <- lapply(delrecent[,7:15], function(i) t.test(i ~ delrecent$SurveyYear.f))
 
-#NEXT: calculate % change and display using https://stackoverflow.com/questions/18700938/ggplot2-positive-and-negative-values-different-color-gradient 
+# set vectors for calculating % change 
 full_results_end <- c(full_ttest$RetentionComp$estimate[2], full_ttest$TalentComp$estimate[2], full_ttest$EnviroComp$estimate[2], full_ttest$EvalComp$estimate[2],
                       full_ttest$CustomerComp$estimate[2], full_ttest$UnitComp$estimate[2], full_ttest$SuperComp$estimate[2], full_ttest$LeaderComp$estimate[2],
                       full_ttest$StateComp$estimate[2])
@@ -138,11 +146,13 @@ rec_results_beg <- c(recent_ttest$RetentionComp$estimate[1], recent_ttest$Talent
                      recent_ttest$CustomerComp$estimate[1], recent_ttest$UnitComp$estimate[1], recent_ttest$SuperComp$estimate[1], recent_ttest$LeaderComp$estimate[1],
                      recent_ttest$StateComp$estimate[1])
 
+# calculate % change. full=2015 to most recent year, while recent should be the most recent year and the prior year
 PC_full <- (full_results_end - full_results_beg)/full_results_beg
 names(PC_full) <- c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership", "State Composite")
 PC_rec <- (rec_results_end - rec_results_beg)/rec_results_beg
 names(PC_rec) <- c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership", "State Composite")
 
+# Extract statistical significance
 full_results_pval <- c(full_ttest$RetentionComp$p.value, full_ttest$TalentComp$p.value, full_ttest$EnviroComp$p.value, full_ttest$EvalComp$p.value,
                        full_ttest$CustomerComp$p.value, full_ttest$UnitComp$p.value, full_ttest$SuperComp$p.value, full_ttest$LeaderComp$p.value,
                        full_ttest$StateComp$p.value)
@@ -167,12 +177,13 @@ rec_results_pval <- replace(rec_results_pval,CI99_rec,"**")
 rec_results_pval <- replace(rec_results_pval,CI95_rec,"*")
 rec_results_pval <- replace(rec_results_pval,CInul_rec," ")
 
-##Timeframe of full survey
-#create a plot
+
+## Timeframe of full survey ##
+# Create a plot
 PC_full_2plot <- data.frame(c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership", "State Composite"), unname(PC_full),
                             paste(round(unname(PC_full)*100,digits = 1),full_results_pval, sep = "%\n"))
 names(PC_full_2plot) <- c("variable", "Change", "sig")
-#set variables in proper order for plotting
+# set variables in proper order for plotting
 PC_full_2plot$variable <- factor(PC_full_2plot$variable, levels = c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership", "State Composite"))
 
 p_PC_full <- ggplot(PC_full_2plot, mapping=aes(x=variable, y=Change, fill=Change)) +
@@ -189,13 +200,16 @@ p_PC_full <- p_PC_full+labs(title="% Change, 2015-2017", x="Survey Focus", y = "
   theme(axis.text.x=element_text(angle=30, hjust=1))
 
 print(p_PC_full)
+picname <- "test.jpg"
+ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
 
-##Timeframe of year-to-year change
-#create a plot
+
+## Timeframe of year-to-year change ##
+# Create a plot
 PC_rec_2plot <- data.frame(c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership", "State Composite"), unname(PC_rec),
                             paste(round(unname(PC_rec)*100,digits = 1),rec_results_pval, sep = "%\n"))
 names(PC_rec_2plot) <- c("variable", "Change", "sig")
-#set variables in proper order for plotting
+# set variables in proper order for plotting
 PC_rec_2plot$variable <- factor(PC_rec_2plot$variable, levels = c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership", "State Composite"))
 
 p_PC_rec <- ggplot(PC_rec_2plot, mapping=aes(x=variable, y=Change, fill=Change)) +
@@ -207,13 +221,18 @@ p_PC_rec <- ggplot(PC_rec_2plot, mapping=aes(x=variable, y=Change, fill=Change))
   geom_label(aes(label=sig), position = position_stack(vjust = 0.5), label.padding = unit(0.1,"lines"), fill = "white")
 
 # Clean up plot
-p_PC_rec <- p_PC_rec+labs(title="% Change, 2015-2017", x="Survey Focus", y = "% Change")+
+p_PC_rec <- p_PC_rec+labs(title="% Change, 2016-2017", x="Survey Focus", y = "% Change", caption = "Significance: * indicates 95% certainty that the % change is due to actual shifts in responses, while ** indicates 99% certainty.")+
   theme_minimal()+ 
   theme(axis.text.x=element_text(angle=30, hjust=1))
 
 print(p_PC_rec)
 
-#List of agency names and abbreviations, to be used in file creation.
+
+## Plot out question-by-question comparisons ##
+
+
+
+# List of agency names and abbreviations, to be used in file creation.
 names <- c("Abraham Lincoln Presidential Library and Museum","Aging, Department on","Agriculture, Department of","Arts Council","Capital Development Board",
            "Central Management Services, Department of","Children and Family Services, Department of","Civil Service Commission, Illinois",
            "Commerce and Economic Opportunity, Department of","Commerce Commission, Illinois","Community College Board","Corrections, Department of",
