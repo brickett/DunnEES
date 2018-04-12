@@ -8,6 +8,7 @@ library(tibble)
 library(ggplot2)
 library(reshape2)
 library(scales)
+library(stringi)
 
 # set directory to GitHub repo
 setwd("C:/Users/bjr21/Documents/GitHub/DunnEES")
@@ -122,7 +123,7 @@ p_SOI_subset_only <- p_SOI_subset_only+labs(title="Survey Section Composite Scor
 print(p_SOI_subset_only)
 
 
-# Determine % change year to year, and whether it is statistically significant##
+## Determine % change year to year, and whether it is statistically significant##
 # Perform t-test
 # use Welch's two-sided test to control for unequal sample sizes
 delfull <- subset(fullset,SurveyYear.f==2015 | SurveyYear.f==2017) #delta between start of survey and most recent year
@@ -229,7 +230,70 @@ print(p_PC_rec)
 
 
 ## Plot out question-by-question comparisons ##
+# Clean 2015 data
+df_2015$`State Average` <- NULL #removes the state average column, aligning the number of question columns across years
+names(df_2015) <- replace(names(df_2015),c(120:178),names(df_2017[130:188])) #cleans up different question intro (all the "my coworkers" replaced with "State of Illinois")
 
+allq_fullset <- dplyr::bind_rows(df_2015[,c(1:4,6:7,120:178)], df_2016[,c(1:3,5:7,124:182)], df_2017[,c(1:3,5:7, 130:188)])
+
+allq_fullset$`Retention and Satisfaction Average` <- NULL
+allq_fullset$`Talent Development Average` <- NULL
+allq_fullset$`Work Environment Average` <- NULL
+allq_fullset$`Worker Evalutions Average` <- NULL
+allq_fullset$`Work Unit Average` <- NULL
+allq_fullset$`Customer Interactions Average` <- NULL
+allq_fullset$`Supervison Average` <- NULL
+allq_fullset$`Leadership Average` <- NULL
+allq_fullset$`Worker Evaluations Average` <- NULL
+allq_fullset$`Supervision Average` <- NULL
+
+# make data into factors
+allq_fullset$Sex <- factor(allq_fullset$Sex)
+allq_fullset$Race <- factor(allq_fullset$Race)
+allq_fullset$Tenure <- factor(allq_fullset$Tenure)
+allq_fullset$Union <- factor(allq_fullset$Union)
+allq_fullset$Agency <- factor(allq_fullset$Agency)
+allq_fullset$SurveyYear.f <- factor(allq_fullset$SurveyYear)
+
+# melt the dataset for aggregation
+allq_fullsetm <- melt(data=allq_fullset, id.vars = c("SurveyYear", "SurveyYear.f", "Sex", "Race", "Tenure", "Union", "Agency"))
+
+# aggregate by year and variable to get mean and standard deviation
+allq_fullmean <- dcast(allq_fullsetm, SurveyYear.f + variable ~ ., mean, na.rm=TRUE) #mean
+allq_fullsd <- dcast(allq_fullsetm, SurveyYear.f + variable ~ ., sd, na.rm=TRUE) #standard deviation
+
+names(allq_fullmean)[3] <- "Mean"
+names(allq_fullsd)[3] <- "SD"
+
+# make into one dataset for plotting
+SOI_allq<- cbind(allq_fullmean,allq_fullsd$SD)
+names(SOI_allq)[4] <- "SD"
+SOI_allq <- na.omit(SOI_allq)
+brkpt <-round(stri_length(SOI_allq$variable)/2, digits=0)
+stri_sub(SOI_allq$variable,brkpt+1,brkpt) <- "-\n"
+
+SOI_allq_Ret <- SOI_allq[c(1:5,52:56,103:107),]
+SOI_allq_Tal <- SOI_allq[c(7:9,58:60,109:111),]
+SOI_allq_Env <- SOI_allq[c(11:17,62:68,113:119),]
+SOI_allq_Eval <- SOI_allq[c(19:25,70:76,121:127),]
+SOI_allq_Cust <- SOI_allq[c(27:30,78:81,129:132),]
+SOI_allq_Unit <- SOI_allq[c(32:36,83:87,134:138),]
+SOI_allq_Sup <- SOI_allq[c(38:42,89:93,140:144),]
+SOI_allq_Lead <- SOI_allq[c(44:49,95:100,146:151),]
+
+# Plot results - basic plot
+p_SOI_allq_Ret<- ggplot(SOI_allq_Ret, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
+  geom_bar(stat="identity", color="black", 
+           position=position_dodge()) +
+  geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
+                position=position_dodge(.9))
+
+# Cleaned up bar plot
+p_SOI_allq_Ret <- p_SOI_allq_Ret+labs(title="Survey Section Average Scores, Mean & 95% Confidence Interval", x="Survey Question", y = "Average Score")+
+  theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
+  theme(axis.text.x=element_text(angle=15, hjust=1))
+
+print(p_SOI_allq_Ret)
 
 
 # List of agency names and abbreviations, to be used in file creation.
