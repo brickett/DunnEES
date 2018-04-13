@@ -17,7 +17,7 @@ setwd("C:/Users/bjr21/Documents/GitHub/DunnEES")
 years <- c("2015","2016","2017")
 
 
-## Import & clean files##
+## Import & clean files ##
 df_2017 <- read_excel("2017EESStats.xlsx", sheet=3)
 df_2016 <- read_excel("2016EESStats.xlsx", sheet=4)
 df_2015 <- read_excel("2015EESStats.xlsx", sheet=2)
@@ -123,7 +123,7 @@ p_SOI_subset_only <- p_SOI_subset_only+labs(title="Survey Section Composite Scor
 print(p_SOI_subset_only)
 
 
-## Determine % change year to year, and whether it is statistically significant##
+## Determine % change year to year, and whether it is statistically significant ##
 # Perform t-test
 # use Welch's two-sided test to control for unequal sample sizes
 delfull <- subset(fullset,SurveyYear.f==2015 | SurveyYear.f==2017) #delta between start of survey and most recent year
@@ -406,6 +406,30 @@ p_SOI_allq_Lead <- p_SOI_allq_Lead+labs(title="Leadership Average Scores, Mean &
   theme(axis.text.x=element_text(angle=15, hjust=1))
 
 print(p_SOI_allq_Lead)
+
+
+## Agency Level Comparison ##
+# prep dataset aggregating all agency responses
+agency_allq_mean <- dcast(allq_fullsetm, SurveyYear.f + variable + Agency ~ ., mean, na.rm=TRUE) #mean
+agency_allq_sd <- dcast(allq_fullsetm, SurveyYear.f + variable + Agency ~ ., sd, na.rm=TRUE) #standard deviation
+agency_allq_count <- dcast(allq_fullsetm, SurveyYear.f + variable + Agency ~ .)
+
+names(agency_allq_mean)[4] <- "Mean"
+names(agency_allq_sd)[4] <- "SD"
+names(agency_allq_count)[4] <- "Count"
+
+Agency_allq <- cbind(agency_allq_mean,agency_allq_sd$SD,agency_allq_count$Count )
+names(Agency_allq)[5] <- "SD"
+names(Agency_allq)[6] <- "Count"
+
+Agency_allq <- na.omit(Agency_allq)
+
+# Gatekeeper dataset - used to determine if there were 10 or less responses in a year
+Agency_2small <- subset(Agency_allq, variable == "StateComp")
+
+
+
+
 
 
 # List of agency names and abbreviations, to be used in file creation.
