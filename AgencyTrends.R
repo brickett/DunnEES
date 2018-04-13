@@ -427,11 +427,6 @@ Agency_allq <- na.omit(Agency_allq)
 # Gatekeeper dataset - used to determine if there were 10 or less responses in a year
 Agency_2small <- subset(Agency_allq, variable == "StateComp")
 
-
-
-
-
-
 # List of agency names and abbreviations, to be used in file creation.
 names <- c("Abraham Lincoln Presidential Library and Museum","Aging, Department on","Agriculture, Department of","Arts Council","Capital Development Board",
            "Central Management Services, Department of","Children and Family Services, Department of","Civil Service Commission, Illinois",
@@ -451,3 +446,61 @@ abbrevs <- c("ALPLM","AGE","AG","AC","CDB","CMS","DCFS","CSC","DCEO","ICC","ICCB
              "HFS","IBHE","HRC","DHR","DHS","DoIT","DOI","DJJ","ILRB","DOL","LETSB","LCC","LOT","GOMB","MDC","IDNR","Other","PCB","IPA","PRB","PTAB","DPH","IRB","REV","OSFM","ISP","SRS",
              "ISAC","TOL","DOT","VA","CVCS","WCC")
 Xagency <- tibble(names, abbrevs)
+
+
+## For loop that creates each agency's file ##
+# select the results that belong to the agency currently being tested
+curr_Agency <- subset(Agency_allq, Agency == Xagency$names[28])
+# create a subset that is just the composite data
+curr_Agency_comps <- subset(curr_Agency, variable == "RetentionComp" | variable =="TalentComp" | variable =="EnviroComp" | 
+                              variable == "EvalComp" | variable == "CustomerComp" | variable == "UnitComp" | variable == "SuperComp" |
+                              variable == "LeaderComp")
+# remove the composite data to leave just the questions
+curr_Agency <- subset(curr_Agency, variable != "RetentionComp" & variable !="TalentComp" & variable !="EnviroComp" & 
+                              variable != "EvalComp" & variable != "CustomerComp" & variable != "UnitComp" & variable != "SuperComp" &
+                              variable != "LeaderComp" & variable != "StateComp")
+
+# combine the agency's average data with the statewide average for plotting
+SOI_subset_only_rbind <- subset(SOI_subset_only, SurveyYear.f == 2017)
+SOI_subset_only_rbind$SurveyYear.f <- factor(SOI_subset_only_rbind$SurveyYear.f)
+Agency_comps_2plot <- rbind(curr_Agency_comps[,c(1:2,4:5)],SOI_subset_only_rbind)
+
+# get the agency's subset of the full set of composite data in order to t-test
+agevsst <- subset(fullset, SurveyYear.f==2017) #delta between agency in 2017 and statewide in 2017
+agevsst <- na.omit(agevsst)
+agevsst <- cbind(agevsst, data.frame(agevsst$Agency == Xagency$names[28]))
+names(agevsst)[17] <- "Flag" # setup t-test between agency's data and all other data (the statistically correct way to do this - not including themselves in the statewide)
+
+# get the agency's data from the past 2 years to compare
+agevslast <- subset(fullset, SurveyYear.f==2017 | SurveyYear.f == 2016) #delta between agency in 2017 and agency in 2016
+agevslast <- subset(agevslast, Agency == Xagency$names[28])
+agevslast <- na.omit(agevslast)
+
+# t-test the two different samples
+test <- lapply(agevsst[7:14], function(i) t.test(i ~ agevsst$Flag))
+test2 <- lapply(agevslast[7:14], function(i) t.test(i ~ agevslast$SurveyYear.f))
+
+
+
+
+# Plot results - basic plot
+p_Agency_comps<- ggplot(Agency_comps_2plot, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
+  geom_bar(stat="identity", color="black", 
+           position=position_dodge()) +
+  geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
+                position=position_dodge(.9))
+
+# Cleaned up bar plot
+p_Agency_comps <- p_Agency_comps+labs(title=paste(Xagency$abbrevs[28],"Survey Section Composite Scores, Mean & 95% Confidence Interval",sep = ", "), x="Survey Focus", y = "Average Composite Score")+
+  theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
+  scale_x_discrete(labels=c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership"))  + 
+  theme(axis.text.x=element_text(angle=30, hjust=1))
+
+print(p_Agency_comps)
+
+# for (i in nrow(Xagency)) {
+#   curr_Agency <- subset(Agency_allq, Agency == Xagency$names[i])
+# }
+
+
+
