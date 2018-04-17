@@ -106,8 +106,9 @@ SOI_results<- cbind(fullmean,fullsd$SD)
 names(SOI_results)[4] <- "SD"
 SOI_results <- na.omit(SOI_results)
 SOI_subset_only <-subset(SOI_results, variable!="StateComp")
+SOI_state_only <-subset(SOI_results, variable=="StateComp")
 
-# Plot results - basic plot
+# Plot results - basic plot: composite questions
 p_SOI_subset_only<- ggplot(SOI_subset_only, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
   geom_bar(stat="identity", color="black", 
            position=position_dodge()) +
@@ -122,6 +123,18 @@ p_SOI_subset_only <- p_SOI_subset_only+labs(title="Survey Section Composite Scor
 
 print(p_SOI_subset_only)
 
+# Plot results - basic plot: Statewide Composite
+p_SOI_state_only<- ggplot(SOI_state_only, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
+  geom_bar(stat="identity", color="black", 
+           position=position_dodge()) +
+  geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
+                position=position_dodge(.9))
+
+# Cleaned up bar plot
+p_SOI_state_only <- p_SOI_state_only+labs(title="Statewide Composite Scores, Mean & 95% Confidence Interval", x="Statewide Cmposite", y = "Average Composite Score")+
+  theme_minimal()+scale_fill_discrete(name = "Survey Year")
+
+print(p_SOI_state_only)
 
 ## Determine % change year to year, and whether it is statistically significant ##
 # Perform t-test
@@ -455,6 +468,7 @@ curr_Agency <- subset(Agency_allq, Agency == Xagency$names[28])
 curr_Agency_comps <- subset(curr_Agency, variable == "RetentionComp" | variable =="TalentComp" | variable =="EnviroComp" | 
                               variable == "EvalComp" | variable == "CustomerComp" | variable == "UnitComp" | variable == "SuperComp" |
                               variable == "LeaderComp")
+curr_Agency_state <- subset(curr_Agency, variable == "StateComp")
 # remove the composite data to leave just the questions
 curr_Agency <- subset(curr_Agency, variable != "RetentionComp" & variable !="TalentComp" & variable !="EnviroComp" & 
                               variable != "EvalComp" & variable != "CustomerComp" & variable != "UnitComp" & variable != "SuperComp" &
@@ -465,6 +479,10 @@ SOI_subset_only_rbind <- subset(SOI_subset_only, SurveyYear.f == 2017)
 SOI_subset_only_rbind$SurveyYear.f <- factor(SOI_subset_only_rbind$SurveyYear.f)
 SOI_subset_only_rbind$SurveyYear.f <- "Statewide"
 Agency_comps_2plot <- rbind(curr_Agency_comps[,c(1:2,4:5)],SOI_subset_only_rbind)
+SOI_state_only_rbind <- subset(SOI_state_only, SurveyYear.f == 2017)
+SOI_state_only_rbind$SurveyYear.f <- factor(SOI_state_only_rbind$SurveyYear.f)
+SOI_state_only_rbind$SurveyYear.f <- "Statewide"
+Agency_state_2plot <- rbind(curr_Agency_state[,c(1:2,4:5)],SOI_state_only_rbind)
 
 # get the agency's subset of the full set of composite data in order to t-test
 agevsst <- subset(fullset, SurveyYear.f==2017) #delta between agency in 2017 and statewide in 2017
@@ -478,8 +496,8 @@ agevslast <- subset(agevslast, Agency == Xagency$names[28])
 agevslast <- na.omit(agevslast)
 
 # t-test the two different samples
-agevsst_ttest <- lapply(agevsst[7:14], function(i) t.test(i ~ agevsst$Flag))
-agevslast_ttest <- lapply(agevslast[7:14], function(i) t.test(i ~ agevslast$SurveyYear.f))
+agevsst_ttest <- lapply(agevsst[7:15], function(i) t.test(i ~ agevsst$Flag))
+agevslast_ttest <- lapply(agevslast[7:15], function(i) t.test(i ~ agevslast$SurveyYear.f))
 
 # extract the p-values
 agency_ttest_results <- c(" "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," ",
@@ -502,7 +520,7 @@ agency_ttest_results <- replace(agency_ttest_results,CInul_age," ")
 Agency_comps_2plot <- cbind(Agency_comps_2plot,agency_ttest_results)
 names(Agency_comps_2plot)[5] <- "sig"
 
-# Plot results - basic plot
+# Plot results - basic plot: composite scores
 p_Agency_comps<- ggplot(Agency_comps_2plot, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
   geom_bar(stat="identity", color="black", 
            position=position_dodge()) +
@@ -519,9 +537,44 @@ p_Agency_comps <- p_Agency_comps+labs(title=paste(Xagency$abbrevs[28],"Survey Se
 
 print(p_Agency_comps)
 
-# for (i in nrow(Xagency)) {
+# extract the p-values
+agency_ttest_state <- c(" "," ",agevsst_ttest$StateComp$p.value, agevslast_ttest$StateComp$p.value)
+
+# test signficance from p-values
+CInul_age_st <- agency_ttest_state>0.05 & agency_ttest_state != " "
+CI95_age_st <- agency_ttest_state<=0.05 & agency_ttest_state>0.01 & agency_ttest_state != " "
+CI99_age_st <- agency_ttest_state<=0.01 & agency_ttest_state != " "
+
+# convert to significance level
+agency_ttest_state <- replace(agency_ttest_state,CI99_age_st,"**")
+agency_ttest_state <- replace(agency_ttest_state,CI95_age_st,"*")
+agency_ttest_state <- replace(agency_ttest_state,CInul_age_st," ")
+
+# bind significance level to the plotting data
+Agency_state_2plot <- cbind(Agency_state_2plot,agency_ttest_state)
+names(Agency_state_2plot)[5] <- "sig"
+
+# Plot results - basic plot: statewide scores
+p_Agency_state<- ggplot(Agency_state_2plot, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
+  geom_bar(stat="identity", color="black", 
+           position=position_dodge()) +
+  geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
+                position=position_dodge(.9))+
+  geom_text(aes(label=sig), position = position_dodge(width = 1.1), vjust = -1)
+
+# Cleaned up bar plot
+p_Agency_state <- p_Agency_state+labs(title=paste(Xagency$abbrevs[28],"Survey Section Composite Scores, Mean & 95% Confidence Interval",sep = ", "), x="Survey Focus", y = "Average Composite Score",
+                                      caption = "Significance: * indicates 95% certainty that the % change is due to actual shifts in responses, while ** indicates 99% certainty.\nAn * over 2017 indicates significant change from 2016 to 2017, while over * indicates a significant difference from the statewide population.")+
+  theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
+  scale_x_discrete(labels=c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership"))  + 
+  theme(axis.text.x=element_text(angle=30, hjust=1))
+
+print(p_Agency_state)
+
+
+
+
+# for (i in seq(1, nrow(Xagency), 1)) {
 #   curr_Agency <- subset(Agency_allq, Agency == Xagency$names[i])
+#   print(Xagency$names[i])
 # }
-
-
-
