@@ -500,8 +500,7 @@ agevsst_ttest <- lapply(agevsst[7:15], function(i) t.test(i ~ agevsst$Flag))
 agevslast_ttest <- lapply(agevslast[7:15], function(i) t.test(i ~ agevslast$SurveyYear.f))
 
 # extract the p-values
-agency_ttest_results <- c(" "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," ",
-          agevsst_ttest$RetentionComp$p.value, agevsst_ttest$TalentComp$p.value, agevsst_ttest$EnviroComp$p.value, agevsst_ttest$EvalComp$p.value,
+agency_ttest_results <- c(agevsst_ttest$RetentionComp$p.value, agevsst_ttest$TalentComp$p.value, agevsst_ttest$EnviroComp$p.value, agevsst_ttest$EvalComp$p.value,
           agevsst_ttest$CustomerComp$p.value, agevsst_ttest$UnitComp$p.value, agevsst_ttest$SuperComp$p.value, agevsst_ttest$LeaderComp$p.value,
           agevslast_ttest$RetentionComp$p.value, agevslast_ttest$TalentComp$p.value, agevslast_ttest$EnviroComp$p.value, agevslast_ttest$EvalComp$p.value,
           agevslast_ttest$CustomerComp$p.value, agevslast_ttest$UnitComp$p.value, agevslast_ttest$SuperComp$p.value, agevslast_ttest$LeaderComp$p.value)
@@ -515,6 +514,8 @@ CI99_age <- agency_ttest_results<=0.01 & agency_ttest_results != " "
 agency_ttest_results <- replace(agency_ttest_results,CI99_age,"**")
 agency_ttest_results <- replace(agency_ttest_results,CI95_age,"*")
 agency_ttest_results <- replace(agency_ttest_results,CInul_age," ")
+
+agency_ttest_results<- c(" "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," ",agency_ttest_results)
 
 # bind significance level to the plotting data
 Agency_comps_2plot <- cbind(Agency_comps_2plot,agency_ttest_results)
@@ -538,7 +539,7 @@ p_Agency_comps <- p_Agency_comps+labs(title=paste(Xagency$abbrevs[28],"Survey Se
 print(p_Agency_comps)
 
 # extract the p-values
-agency_ttest_state <- c(" "," ",agevsst_ttest$StateComp$p.value, agevslast_ttest$StateComp$p.value)
+agency_ttest_state <- c(agevslast_ttest$StateComp$p.value, agevsst_ttest$StateComp$p.value)
 
 # test signficance from p-values
 CInul_age_st <- agency_ttest_state>0.05 & agency_ttest_state != " "
@@ -549,6 +550,8 @@ CI99_age_st <- agency_ttest_state<=0.01 & agency_ttest_state != " "
 agency_ttest_state <- replace(agency_ttest_state,CI99_age_st,"**")
 agency_ttest_state <- replace(agency_ttest_state,CI95_age_st,"*")
 agency_ttest_state <- replace(agency_ttest_state,CInul_age_st," ")
+
+agency_ttest_state <- c(" ", " ", agency_ttest_state)
 
 # bind significance level to the plotting data
 Agency_state_2plot <- cbind(Agency_state_2plot,agency_ttest_state)
