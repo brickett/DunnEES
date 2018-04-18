@@ -9,6 +9,8 @@ library(ggplot2)
 library(reshape2)
 library(scales)
 library(stringi)
+library(magrittr)
+library(dplyr)
 
 # set directory to GitHub repo
 setwd("C:/Users/bjr21/Documents/GitHub/DunnEES")
@@ -282,7 +284,7 @@ names(allq_fullsd)[3] <- "SD"
 SOI_allq<- cbind(allq_fullmean,allq_fullsd$SD)
 names(SOI_allq)[4] <- "SD"
 SOI_allq <- na.omit(SOI_allq)
-brkpt <-round(stri_length(SOI_allq$variable)/2, digits=0)
+brkpt <-round(stri_length(SOI_allq$variable)/2, digits=0) #add breakpoint for plotting - splits halfway through question
 stri_sub(SOI_allq$variable,brkpt+1,brkpt) <- "-\n"
 
 SOI_allq_Ret <- SOI_allq[c(1:5,52:56,103:107),]
@@ -474,6 +476,10 @@ curr_Agency <- subset(curr_Agency, variable != "RetentionComp" & variable !="Tal
                               variable != "EvalComp" & variable != "CustomerComp" & variable != "UnitComp" & variable != "SuperComp" &
                               variable != "LeaderComp" & variable != "StateComp")
 
+# Add the breakpoint into each question
+brkpt <-round(stri_length(curr_Agency$variable)/2, digits=0) #add breakpoint for plotting - splits halfway through question
+stri_sub(curr_Agency$variable,brkpt+1,brkpt) <- "-\n"
+
 # combine the agency's average data with the statewide average for plotting
 SOI_subset_only_rbind <- subset(SOI_subset_only, SurveyYear.f == 2017)
 SOI_subset_only_rbind$SurveyYear.f <- factor(SOI_subset_only_rbind$SurveyYear.f)
@@ -566,16 +572,163 @@ p_Agency_state<- ggplot(Agency_state_2plot, aes(x=variable, y=Mean, fill=SurveyY
   geom_text(aes(label=sig), position = position_dodge(width = 1.1), vjust = -1)
 
 # Cleaned up bar plot
-p_Agency_state <- p_Agency_state+labs(title=paste(Xagency$abbrevs[28],"Survey Section Composite Scores, Mean & 95% Confidence Interval",sep = ", "), x="Survey Focus", y = "Average Composite Score",
+p_Agency_state <- p_Agency_state+labs(title=paste(Xagency$abbrevs[28],"Survey Section Composite Scores, Mean & 95% Confidence Interval",sep = ", "), x="Statewide Composite Score", y = "Average Composite Score",
                                       caption = "Significance: * indicates 95% certainty that the % change is due to actual shifts in responses, while ** indicates 99% certainty.\nAn * over 2017 indicates significant change from 2016 to 2017, while over * indicates a significant difference from the statewide population.")+
   theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
-  scale_x_discrete(labels=c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership"))  + 
-  theme(axis.text.x=element_text(angle=30, hjust=1))
+  scale_x_discrete(labels="Statewide Composite Score")
 
 print(p_Agency_state)
 
 
+## Plot out the question results over time ##
 
+# Create filters based on variable names (flexible instead of using the numbering subsetting format)
+filter_allq_Ret <- SOI_allq$variable[c(1:5,52:56,103:107)]
+filter_allq_Tal <- SOI_allq$variable[c(7:9,58:60,109:111)]
+filter_allq_Env <- SOI_allq$variable[c(11:17,62:68,113:119)]
+filter_allq_Eval <- SOI_allq$variable[c(19:25,70:76,121:127)]
+filter_allq_Cust <- SOI_allq$variable[c(27:30,78:81,129:132)]
+filter_allq_Unit <- SOI_allq$variable[c(32:36,83:87,134:138)]
+filter_allq_Sup <- SOI_allq$variable[c(38:42,89:93,140:144)]
+filter_allq_Lead <- SOI_allq$variable[c(44:49,95:100,146:151)]
+
+# Get subset for plotting using dplyr functions
+age_allq_Ret <- curr_Agency %>% 
+  select(SurveyYear.f, variable, Agency, Mean, SD) %>%
+  filter(variable %in% filter_allq_Ret)
+age_allq_Tal <- curr_Agency %>% 
+  select(SurveyYear.f, variable, Agency, Mean, SD) %>%
+  filter(variable %in% filter_allq_Tal)
+age_allq_Env <- curr_Agency %>% 
+  select(SurveyYear.f, variable, Agency, Mean, SD) %>%
+  filter(variable %in% filter_allq_Env)
+age_allq_Eval <- curr_Agency %>% 
+  select(SurveyYear.f, variable, Agency, Mean, SD) %>%
+  filter(variable %in% filter_allq_Eval)
+age_allq_Cust <- curr_Agency %>% 
+  select(SurveyYear.f, variable, Agency, Mean, SD) %>%
+  filter(variable %in% filter_allq_Cust)
+age_allq_Unit <- curr_Agency %>% 
+  select(SurveyYear.f, variable, Agency, Mean, SD) %>%
+  filter(variable %in% filter_allq_Unit)
+age_allq_Sup <- curr_Agency %>% 
+  select(SurveyYear.f, variable, Agency, Mean, SD) %>%
+  filter(variable %in% filter_allq_Sup)
+age_allq_Lead <- curr_Agency %>% 
+  select(SurveyYear.f, variable, Agency, Mean, SD) %>%
+  filter(variable %in% filter_allq_Lead)
+
+# Plot results - Retention & Satisfaction - basic plot
+p_age_allq_Ret<- ggplot(age_allq_Ret, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
+  geom_bar(stat="identity", color="black", 
+           position=position_dodge()) +
+  geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
+                position=position_dodge(.9))
+
+# Cleaned up bar plot
+p_age_allq_Ret <- p_age_allq_Ret+labs(title="Retention & Satisfaction Average Scores, Mean & 95% Confidence Interval", x="Survey Question", y = "Average Score")+
+  theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
+  theme(axis.text.x=element_text(angle=15, hjust=1))
+
+print(p_age_allq_Ret)
+
+# Plot results - Talent Development - basic plot
+p_age_allq_Tal<- ggplot(age_allq_Tal, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
+  geom_bar(stat="identity", color="black", 
+           position=position_dodge()) +
+  geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
+                position=position_dodge(.9))
+
+# Cleaned up bar plot
+p_age_allq_Tal <- p_age_allq_Tal+labs(title="Talent Development Average Scores, Mean & 95% Confidence Interval", x="Survey Question", y = "Average Score")+
+  theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
+  theme(axis.text.x=element_text(angle=15, hjust=1))
+
+print(p_age_allq_Tal)
+
+# Plot results - Work Environment - basic plot
+p_age_allq_Env<- ggplot(age_allq_Env, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
+  geom_bar(stat="identity", color="black", 
+           position=position_dodge()) +
+  geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
+                position=position_dodge(.9))
+
+# Cleaned up bar plot
+p_age_allq_Env <- p_age_allq_Env+labs(title="Work Environment Average Scores, Mean & 95% Confidence Interval", x="Survey Question", y = "Average Score")+
+  theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
+  theme(axis.text.x=element_text(angle=15, hjust=1))
+
+print(p_age_allq_Env)
+
+# Plot results - Worker Evaluations - basic plot
+p_age_allq_Eval <- ggplot(age_allq_Eval, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
+  geom_bar(stat="identity", color="black", 
+           position=position_dodge()) +
+  geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
+                position=position_dodge(.9))
+
+# Cleaned up bar plot
+p_age_allq_Eval <- p_age_allq_Eval+labs(title="Worker Evaluations Average Scores, Mean & 95% Confidence Interval", x="Survey Question", y = "Average Score")+
+  theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
+  theme(axis.text.x=element_text(angle=15, hjust=1))
+
+print(p_age_allq_Eval)
+
+# Plot results - Customer Interactions - basic plot
+p_age_allq_Cust<- ggplot(age_allq_Cust, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
+  geom_bar(stat="identity", color="black", 
+           position=position_dodge()) +
+  geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
+                position=position_dodge(.9))
+
+# Cleaned up bar plot
+p_age_allq_Cust <- p_age_allq_Cust+labs(title="Customer Interactions Average Scores, Mean & 95% Confidence Interval", x="Survey Question", y = "Average Score")+
+  theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
+  theme(axis.text.x=element_text(angle=15, hjust=1))
+
+print(p_age_allq_Cust)
+
+# Plot results - Work Unit - basic plot
+p_age_allq_Unit<- ggplot(age_allq_Unit, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
+  geom_bar(stat="identity", color="black", 
+           position=position_dodge()) +
+  geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
+                position=position_dodge(.9))
+
+# Cleaned up bar plot
+p_age_allq_Unit <- p_age_allq_Unit+labs(title="Work Unit Average Scores, Mean & 95% Confidence Interval", x="Survey Question", y = "Average Score")+
+  theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
+  theme(axis.text.x=element_text(angle=15, hjust=1))
+
+print(p_age_allq_Unit)
+
+# Plot results - Supervision - basic plot
+p_age_allq_Sup<- ggplot(age_allq_Sup, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
+  geom_bar(stat="identity", color="black", 
+           position=position_dodge()) +
+  geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
+                position=position_dodge(.9))
+
+# Cleaned up bar plot
+p_age_allq_Sup <- p_age_allq_Sup+labs(title="Supervision Average Scores, Mean & 95% Confidence Interval", x="Survey Question", y = "Average Score")+
+  theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
+  theme(axis.text.x=element_text(angle=15, hjust=1))
+
+print(p_age_allq_Sup)
+
+# Plot results - Leadership - basic plot
+p_age_allq_Lead <- ggplot(age_allq_Lead, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
+  geom_bar(stat="identity", color="black", 
+           position=position_dodge()) +
+  geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
+                position=position_dodge(.9))
+
+# Cleaned up bar plot
+p_age_allq_Lead <- p_age_allq_Lead+labs(title="Leadership Average Scores, Mean & 95% Confidence Interval", x="Survey Question", y = "Average Score")+
+  theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
+  theme(axis.text.x=element_text(angle=15, hjust=1))
+
+print(p_age_allq_Lead)
 
 # for (i in seq(1, nrow(Xagency), 1)) {
 #   curr_Agency <- subset(Agency_allq, Agency == Xagency$names[i])
