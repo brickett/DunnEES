@@ -19,13 +19,14 @@ setwd("C:/Users/bjr21/Documents/GitHub/DunnEES")
 # set number of years
 years <- c("2015","2016","2017")
 
-
 ## Import & clean files ##
 df_2017 <- read_excel("2017EESStats.xlsx", sheet=3)
 df_2016 <- read_excel("2016EESStats.xlsx", sheet=4)
 df_2015 <- read_excel("2015EESStats.xlsx", sheet=2)
 
 # Clean & combine
+#This code makes the column names R-friendly for later manipulation. It also selects a subset of the data in 'keeps' to use for analysis
+#and converts 'keeps' into 'comps' (short for composites), a dataframe instead of a tibble. 'comps' will be combined into a full set of data later.
 names(df_2017)[2] <- "Sex"
 names(df_2017)[3] <- "Race"
 names(df_2017)[4] <- "OtherRace"
@@ -44,7 +45,7 @@ names(df_2017)[187] <- "LeaderComp"
 names(df_2017)[188] <- "StateComp"
 keeps_2017 <- c("SurveyYear", "Sex", "Race", "Tenure", "Union", "Agency", "RetentionComp", "TalentComp", "EnviroComp", "EvalComp", "CustomerComp", "UnitComp", "SuperComp", "LeaderComp", "StateComp")
 comps_2017 <- df_2017[keeps_2017]
-comps_2017 <- comps_2017[rowSums(is.na(comps_2017))!=ncol(comps_2017), ]
+comps_2017 <- comps_2017[rowSums(is.na(comps_2017))!=ncol(comps_2017), ] #drops the values where all responses are null (e.g. someone only answered the open responses)
 
 names(df_2016)[2] <- "Sex"
 names(df_2016)[3] <- "Race"
@@ -86,8 +87,8 @@ comps_2015 <- comps_2015[rowSums(is.na(comps_2015))!=ncol(comps_2015), ]
 
 
 # make into one large dataset
-fullset <- rbind(comps_2015, comps_2016, comps_2017)
-fullset$Sex <- factor(fullset$Sex)
+fullset <- rbind(comps_2015, comps_2016, comps_2017) #combines the subsets of each year into a subset of all years.
+fullset$Sex <- factor(fullset$Sex) #makes factor variables for earier manipulation later
 fullset$Race <- factor(fullset$Race)
 fullset$Tenure <- factor(fullset$Tenure)
 fullset$Union <- factor(fullset$Union)
@@ -95,23 +96,26 @@ fullset$Agency <- factor(fullset$Agency)
 fullset$SurveyYear.f <- factor(fullset$SurveyYear)
 
 # keep only the results that have at least some survey answers
-fullset <- drop_na(fullset, "StateComp")
+fullset <- drop_na(fullset, "StateComp") #because StateComp is a sum of all the other composites, if it is N/A, they must have submitted no numeric answers
 
 ## Survey Results Analysis ##
 # Calculate aggregate statistics
+#melt the dataset so that each composite is on its own line, separated out by all of the ID variables below
 fullsetm <- melt(data=fullset, id.vars = c("SurveyYear", "SurveyYear.f", "Sex", "Race", "Tenure", "Union", "Agency"))
 
+#cast the dataset to get the mean and standard deviation across the entire population
 fullmean <- dcast(fullsetm, SurveyYear.f + variable ~ ., mean, na.rm=TRUE)
 fullsd <- dcast(fullsetm, SurveyYear.f + variable ~ ., sd, na.rm=TRUE)
 
 names(fullmean)[3] <- "Mean"
 names(fullsd)[3] <- "SD"
 
+# Bind the mean and standard deviation into one dataset
 SOI_results<- cbind(fullmean,fullsd$SD)
 names(SOI_results)[4] <- "SD"
-SOI_results <- na.omit(SOI_results)
-SOI_subset_only <-subset(SOI_results, variable!="StateComp")
-SOI_state_only <-subset(SOI_results, variable=="StateComp")
+SOI_results <- na.omit(SOI_results) #clear out the glitch of the unknown years that melting introduces
+SOI_subset_only <-subset(SOI_results, variable!="StateComp") #all of the composite scores except the statewide composite
+SOI_state_only <-subset(SOI_results, variable=="StateComp") #only the statewide composite score
 
 # Plot results - basic plot: composite questions
 p_SOI_subset_only<- ggplot(SOI_subset_only, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
@@ -151,10 +155,10 @@ ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, he
 delfull <- subset(fullset,SurveyYear.f==2015 | SurveyYear.f==2017) #delta between start of survey and most recent year
 delrecent <- subset(fullset,SurveyYear.f==2016 | SurveyYear.f==2017) #delta between last two runs of the survey
 
-full_ttest <- lapply(delfull[,7:15], function(i) t.test(i ~ delfull$SurveyYear.f))
-recent_ttest <- lapply(delrecent[,7:15], function(i) t.test(i ~ delrecent$SurveyYear.f))
+full_ttest <- lapply(delfull[,7:15], function(i) t.test(i ~ delfull$SurveyYear.f)) #lapply produces a vector that applies the function to each column of the input
+recent_ttest <- lapply(delrecent[,7:15], function(i) t.test(i ~ delrecent$SurveyYear.f)) #the ttest function tells it that two populations are indicated by the two years
 
-# set vectors for calculating % change 
+# set vectors for calculating % change - extracts the results from the vector
 full_results_end <- c(full_ttest$RetentionComp$estimate[2], full_ttest$TalentComp$estimate[2], full_ttest$EnviroComp$estimate[2], full_ttest$EvalComp$estimate[2],
                       full_ttest$CustomerComp$estimate[2], full_ttest$UnitComp$estimate[2], full_ttest$SuperComp$estimate[2], full_ttest$LeaderComp$estimate[2],
                       full_ttest$StateComp$estimate[2])
@@ -180,14 +184,17 @@ full_results_pval <- c(full_ttest$RetentionComp$p.value, full_ttest$TalentComp$p
                        full_ttest$CustomerComp$p.value, full_ttest$UnitComp$p.value, full_ttest$SuperComp$p.value, full_ttest$LeaderComp$p.value,
                        full_ttest$StateComp$p.value)
 
+# Translate statistical significance into un-significant, 95% confidence interval, 99% confidence interval
 CInul_full <- full_results_pval>0.05
 CI95_full <- full_results_pval<=0.05 & full_results_pval>0.01
 CI99_full <- full_results_pval<=0.01
 
+# Use the logical variables above to create graphical representations of significance
 full_results_pval <- replace(full_results_pval,CI99_full,"**")
 full_results_pval <- replace(full_results_pval,CI95_full,"*")
 full_results_pval <- replace(full_results_pval,CInul_full," ")
 
+# Repeat the translation of significance for the change in the 'recent' set
 rec_results_pval <- c(recent_ttest$RetentionComp$p.value, recent_ttest$TalentComp$p.value, recent_ttest$EnviroComp$p.value, recent_ttest$EvalComp$p.value,
                        recent_ttest$CustomerComp$p.value, recent_ttest$UnitComp$p.value, recent_ttest$SuperComp$p.value, recent_ttest$LeaderComp$p.value,
                        recent_ttest$StateComp$p.value)
@@ -201,7 +208,7 @@ rec_results_pval <- replace(rec_results_pval,CI95_rec,"*")
 rec_results_pval <- replace(rec_results_pval,CInul_rec," ")
 
 
-## Timeframe of full survey ##
+## Show Percent Change - Timeframe of full survey ##
 # Create a plot
 PC_full_2plot <- data.frame(c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership", "State Composite"), unname(PC_full),
                             paste(round(unname(PC_full)*100,digits = 1),full_results_pval, sep = "%\n"))
@@ -227,7 +234,7 @@ picname <- "1Statewide_PercentChange_Overall.jpg"
 ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
 
 
-## Timeframe of year-to-year change ##
+## Show Percent Change - Timeframe of year-to-year change ##
 # Create a plot
 PC_rec_2plot <- data.frame(c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership", "State Composite"), unname(PC_rec),
                             paste(round(unname(PC_rec)*100,digits = 1),rec_results_pval, sep = "%\n"))
@@ -438,7 +445,7 @@ ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, he
 
 
 ## Agency Level Comparison ##
-# prep dataset aggregating all agency responses
+# prep dataset aggregating all agency responses - cast the melted questions into mean/sd by question, but also sort on agency
 agency_allq_mean <- dcast(allq_fullsetm, SurveyYear.f + variable + Agency ~ ., mean, na.rm=TRUE) #mean
 agency_allq_sd <- dcast(allq_fullsetm, SurveyYear.f + variable + Agency ~ ., sd, na.rm=TRUE) #standard deviation
 agency_allq_count <- dcast(allq_fullsetm, SurveyYear.f + variable + Agency ~ .)
@@ -447,11 +454,12 @@ names(agency_allq_mean)[4] <- "Mean"
 names(agency_allq_sd)[4] <- "SD"
 names(agency_allq_count)[4] <- "Count"
 
-Agency_allq <- cbind(agency_allq_mean,agency_allq_sd$SD,agency_allq_count$Count )
+# Combine the mean and SD into one dataset, along with the count of how many respondents (sorted by year, agency, and question)
+Agency_allq <- cbind(agency_allq_mean,agency_allq_sd$SD,agency_allq_count$Count)
 names(Agency_allq)[5] <- "SD"
 names(Agency_allq)[6] <- "Count"
 
-Agency_allq <- na.omit(Agency_allq)
+Agency_allq <- na.omit(Agency_allq) #drop the glitch blank years caused by melting & casting the data
 
 # Gatekeeper dataset - used to determine if there were 10 or less responses in a year
 Agency_2small <- subset(Agency_allq, variable == "StateComp")
