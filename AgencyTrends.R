@@ -486,10 +486,6 @@ Xagency <- tibble(names, abbrevs)
 
 
 
-
-
-
-
 ## For loop that creates each agency's file ##
 
 for (i in seq(1, nrow(Xagency), 1)) {
@@ -783,18 +779,19 @@ for (i in seq(1, nrow(Xagency), 1)) {
     picname <- paste(Xagency$abbrevs[i],"_Leadership.jpg")
     #ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
   }
-  
+ 
+  ### FOR AGENCIES WITH TWO YEARS OF DATA ### 
   else if (numyears == 2){
     print(paste(Xagency$names[i],"has two (2) years."))
     # select the results that belong to the agency currently being tested
     curr_Agency <- subset(Agency_allq, Agency == Xagency$names[i])
     # create a subset that is just the composite data
-    curr_Agency_comps <- subset(curr_Agency, variable == "RetentionComp" | variable =="TalentComp" | variable =="EnviroComp" | 
+    curr_Agency_comps <- subset(curr_Agency, variable == "RetentionComp" | variable =="TalentComp" | variable =="EnviroComp" |
                                   variable == "EvalComp" | variable == "CustomerComp" | variable == "UnitComp" | variable == "SuperComp" |
                                   variable == "LeaderComp")
     curr_Agency_state <- subset(curr_Agency, variable == "StateComp")
     # remove the composite data to leave just the questions
-    curr_Agency <- subset(curr_Agency, variable != "RetentionComp" & variable !="TalentComp" & variable !="EnviroComp" & 
+    curr_Agency <- subset(curr_Agency, variable != "RetentionComp" & variable !="TalentComp" & variable !="EnviroComp" &
                             variable != "EvalComp" & variable != "CustomerComp" & variable != "UnitComp" & variable != "SuperComp" &
                             variable != "LeaderComp" & variable != "StateComp")
     
@@ -843,15 +840,15 @@ for (i in seq(1, nrow(Xagency), 1)) {
     agency_ttest_results <- replace(agency_ttest_results,CI95_age,"*")
     agency_ttest_results <- replace(agency_ttest_results,CInul_age," ")
     
-    agency_ttest_results<- c(" "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," ",agency_ttest_results)
+    agency_ttest_results<- c(" "," "," "," "," "," "," "," ",agency_ttest_results)
     
     # bind significance level to the plotting data
     Agency_comps_2plot <- cbind(Agency_comps_2plot,agency_ttest_results)
     names(Agency_comps_2plot)[5] <- "sig"
     
     # Plot results - basic plot: composite scores
-    p_Agency_comps<- ggplot(Agency_comps_2plot, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
-      geom_bar(stat="identity", color="black", 
+    p_Agency_comps<- ggplot(Agency_comps_2plot, aes(x=variable, y=Mean, fill=SurveyYear.f)) +
+      geom_bar(stat="identity", color="black",
                position=position_dodge()) +
       geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
                     position=position_dodge(.9))+
@@ -859,9 +856,9 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     # Cleaned up bar plot
     p_Agency_comps <- p_Agency_comps+labs(title=paste(Xagency$abbrevs[i],"Survey Section Composite Scores, Mean & 95% Confidence Interval",sep = ", "), x="Survey Focus", y = "Average Composite Score",
-                                          caption = "Significance: * indicates 95% certainty that the % change is due to actual shifts in responses, while ** indicates 99% certainty.\nAn * over 2017 indicates significant change from 2016 to 2017, while over * indicates a significant difference from the statewide population.")+
-      theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
-      scale_x_discrete(labels=c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership"))  + 
+                                          caption = "Significance: * indicates 95% certainty that the % change is due to actual shifts in responses, while ** indicates 99% certainty.\nAn * over 2017 indicates significant change from 2016 to 2017, while over Statewide indicates a significant difference from the statewide population.")+
+      theme_minimal()+scale_fill_discrete(name = "Survey Year") +
+      scale_x_discrete(labels=c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership"))  +
       theme(axis.text.x=element_text(angle=30, hjust=1))
     
     #print(p_Agency_comps)
@@ -881,15 +878,15 @@ for (i in seq(1, nrow(Xagency), 1)) {
     agency_ttest_state <- replace(agency_ttest_state,CI95_age_st,"*")
     agency_ttest_state <- replace(agency_ttest_state,CInul_age_st," ")
     
-    agency_ttest_state <- c(" ", " ", agency_ttest_state)
+    agency_ttest_state <- c(" ", agency_ttest_state)
     
     # bind significance level to the plotting data
     Agency_state_2plot <- cbind(Agency_state_2plot,agency_ttest_state)
     names(Agency_state_2plot)[5] <- "sig"
     
     # Plot results - basic plot: statewide scores
-    p_Agency_state<- ggplot(Agency_state_2plot, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
-      geom_bar(stat="identity", color="black", 
+    p_Agency_state<- ggplot(Agency_state_2plot, aes(x=variable, y=Mean, fill=SurveyYear.f)) +
+      geom_bar(stat="identity", color="black",
                position=position_dodge()) +
       geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
                     position=position_dodge(.9))+
@@ -898,7 +895,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     # Cleaned up bar plot
     p_Agency_state <- p_Agency_state+labs(title=paste(Xagency$abbrevs[i],"Survey Section Composite Scores, Mean & 95% Confidence Interval",sep = ", "), x="Statewide Composite Score", y = "Average Composite Score",
                                           caption = "Significance: * indicates 95% certainty that the % change is due to actual shifts in responses, while ** indicates 99% certainty.\nAn * over 2017 indicates significant change from 2016 to 2017, while over * indicates a significant difference from the statewide population.")+
-      theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
+      theme_minimal()+scale_fill_discrete(name = "Survey Year") +
       scale_x_discrete(labels="Statewide Composite Score")
     
     #print(p_Agency_state)
@@ -908,51 +905,51 @@ for (i in seq(1, nrow(Xagency), 1)) {
     ## Plot out the question results over time ##
     
     # Create filters based on variable names (flexible instead of using the numbering subsetting format)
-    filter_allq_Ret <- SOI_allq$variable[c(1:5,52:56,103:107)]
-    filter_allq_Tal <- SOI_allq$variable[c(7:9,58:60,109:111)]
-    filter_allq_Env <- SOI_allq$variable[c(11:17,62:68,113:119)]
-    filter_allq_Eval <- SOI_allq$variable[c(19:25,70:76,121:127)]
-    filter_allq_Cust <- SOI_allq$variable[c(27:30,78:81,129:132)]
-    filter_allq_Unit <- SOI_allq$variable[c(32:36,83:87,134:138)]
-    filter_allq_Sup <- SOI_allq$variable[c(38:42,89:93,140:144)]
-    filter_allq_Lead <- SOI_allq$variable[c(44:49,95:100,146:151)]
+    filter_allq_Ret <- SOI_allq$variable[c(52:56,103:107)]
+    filter_allq_Tal <- SOI_allq$variable[c(58:60,109:111)]
+    filter_allq_Env <- SOI_allq$variable[c(62:68,113:119)]
+    filter_allq_Eval <- SOI_allq$variable[c(70:76,121:127)]
+    filter_allq_Cust <- SOI_allq$variable[c(78:81,129:132)]
+    filter_allq_Unit <- SOI_allq$variable[c(83:87,134:138)]
+    filter_allq_Sup <- SOI_allq$variable[c(89:93,140:144)]
+    filter_allq_Lead <- SOI_allq$variable[c(95:100,146:151)]
     
     # Get subset for plotting using dplyr functions
-    age_allq_Ret <- curr_Agency %>% 
+    age_allq_Ret <- curr_Agency %>%
       select(SurveyYear.f, variable, Agency, Mean, SD) %>%
       filter(variable %in% filter_allq_Ret)
-    age_allq_Tal <- curr_Agency %>% 
+    age_allq_Tal <- curr_Agency %>%
       select(SurveyYear.f, variable, Agency, Mean, SD) %>%
       filter(variable %in% filter_allq_Tal)
-    age_allq_Env <- curr_Agency %>% 
+    age_allq_Env <- curr_Agency %>%
       select(SurveyYear.f, variable, Agency, Mean, SD) %>%
       filter(variable %in% filter_allq_Env)
-    age_allq_Eval <- curr_Agency %>% 
+    age_allq_Eval <- curr_Agency %>%
       select(SurveyYear.f, variable, Agency, Mean, SD) %>%
       filter(variable %in% filter_allq_Eval)
-    age_allq_Cust <- curr_Agency %>% 
+    age_allq_Cust <- curr_Agency %>%
       select(SurveyYear.f, variable, Agency, Mean, SD) %>%
       filter(variable %in% filter_allq_Cust)
-    age_allq_Unit <- curr_Agency %>% 
+    age_allq_Unit <- curr_Agency %>%
       select(SurveyYear.f, variable, Agency, Mean, SD) %>%
       filter(variable %in% filter_allq_Unit)
-    age_allq_Sup <- curr_Agency %>% 
+    age_allq_Sup <- curr_Agency %>%
       select(SurveyYear.f, variable, Agency, Mean, SD) %>%
       filter(variable %in% filter_allq_Sup)
-    age_allq_Lead <- curr_Agency %>% 
+    age_allq_Lead <- curr_Agency %>%
       select(SurveyYear.f, variable, Agency, Mean, SD) %>%
       filter(variable %in% filter_allq_Lead)
     
     # Plot results - Retention & Satisfaction - basic plot
-    p_age_allq_Ret<- ggplot(age_allq_Ret, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
-      geom_bar(stat="identity", color="black", 
+    p_age_allq_Ret<- ggplot(age_allq_Ret, aes(x=variable, y=Mean, fill=SurveyYear.f)) +
+      geom_bar(stat="identity", color="black",
                position=position_dodge()) +
       geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
                     position=position_dodge(.9))
     
     # Cleaned up bar plot
     p_age_allq_Ret <- p_age_allq_Ret+labs(title="Retention & Satisfaction Average Scores, Mean & 95% Confidence Interval", x="Survey Question", y = "Average Score")+
-      theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
+      theme_minimal()+scale_fill_discrete(name = "Survey Year") +
       theme(axis.text.x=element_text(angle=15, hjust=1))
     
     #print(p_age_allq_Ret)
@@ -960,15 +957,15 @@ for (i in seq(1, nrow(Xagency), 1)) {
     #ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
     
     # Plot results - Talent Development - basic plot
-    p_age_allq_Tal<- ggplot(age_allq_Tal, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
-      geom_bar(stat="identity", color="black", 
+    p_age_allq_Tal<- ggplot(age_allq_Tal, aes(x=variable, y=Mean, fill=SurveyYear.f)) +
+      geom_bar(stat="identity", color="black",
                position=position_dodge()) +
       geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
                     position=position_dodge(.9))
     
     # Cleaned up bar plot
     p_age_allq_Tal <- p_age_allq_Tal+labs(title="Talent Development Average Scores, Mean & 95% Confidence Interval", x="Survey Question", y = "Average Score")+
-      theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
+      theme_minimal()+scale_fill_discrete(name = "Survey Year") +
       theme(axis.text.x=element_text(angle=15, hjust=1))
     
     #print(p_age_allq_Tal)
@@ -976,15 +973,15 @@ for (i in seq(1, nrow(Xagency), 1)) {
     #ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
     
     # Plot results - Work Environment - basic plot
-    p_age_allq_Env<- ggplot(age_allq_Env, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
-      geom_bar(stat="identity", color="black", 
+    p_age_allq_Env<- ggplot(age_allq_Env, aes(x=variable, y=Mean, fill=SurveyYear.f)) +
+      geom_bar(stat="identity", color="black",
                position=position_dodge()) +
       geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
                     position=position_dodge(.9))
     
     # Cleaned up bar plot
     p_age_allq_Env <- p_age_allq_Env+labs(title="Work Environment Average Scores, Mean & 95% Confidence Interval", x="Survey Question", y = "Average Score")+
-      theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
+      theme_minimal()+scale_fill_discrete(name = "Survey Year") +
       theme(axis.text.x=element_text(angle=15, hjust=1))
     
     #print(p_age_allq_Env)
@@ -992,15 +989,15 @@ for (i in seq(1, nrow(Xagency), 1)) {
     #ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
     
     # Plot results - Worker Evaluations - basic plot
-    p_age_allq_Eval <- ggplot(age_allq_Eval, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
-      geom_bar(stat="identity", color="black", 
+    p_age_allq_Eval <- ggplot(age_allq_Eval, aes(x=variable, y=Mean, fill=SurveyYear.f)) +
+      geom_bar(stat="identity", color="black",
                position=position_dodge()) +
       geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
                     position=position_dodge(.9))
     
     # Cleaned up bar plot
     p_age_allq_Eval <- p_age_allq_Eval+labs(title="Worker Evaluations Average Scores, Mean & 95% Confidence Interval", x="Survey Question", y = "Average Score")+
-      theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
+      theme_minimal()+scale_fill_discrete(name = "Survey Year") +
       theme(axis.text.x=element_text(angle=15, hjust=1))
     
     #print(p_age_allq_Eval)
@@ -1008,15 +1005,15 @@ for (i in seq(1, nrow(Xagency), 1)) {
     #ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
     
     # Plot results - Customer Interactions - basic plot
-    p_age_allq_Cust<- ggplot(age_allq_Cust, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
-      geom_bar(stat="identity", color="black", 
+    p_age_allq_Cust<- ggplot(age_allq_Cust, aes(x=variable, y=Mean, fill=SurveyYear.f)) +
+      geom_bar(stat="identity", color="black",
                position=position_dodge()) +
       geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
                     position=position_dodge(.9))
     
     # Cleaned up bar plot
     p_age_allq_Cust <- p_age_allq_Cust+labs(title="Customer Interactions Average Scores, Mean & 95% Confidence Interval", x="Survey Question", y = "Average Score")+
-      theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
+      theme_minimal()+scale_fill_discrete(name = "Survey Year") +
       theme(axis.text.x=element_text(angle=15, hjust=1))
     
     #print(p_age_allq_Cust)
@@ -1024,15 +1021,15 @@ for (i in seq(1, nrow(Xagency), 1)) {
     #ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
     
     # Plot results - Work Unit - basic plot
-    p_age_allq_Unit<- ggplot(age_allq_Unit, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
-      geom_bar(stat="identity", color="black", 
+    p_age_allq_Unit<- ggplot(age_allq_Unit, aes(x=variable, y=Mean, fill=SurveyYear.f)) +
+      geom_bar(stat="identity", color="black",
                position=position_dodge()) +
       geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
                     position=position_dodge(.9))
     
     # Cleaned up bar plot
     p_age_allq_Unit <- p_age_allq_Unit+labs(title="Work Unit Average Scores, Mean & 95% Confidence Interval", x="Survey Question", y = "Average Score")+
-      theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
+      theme_minimal()+scale_fill_discrete(name = "Survey Year") +
       theme(axis.text.x=element_text(angle=15, hjust=1))
     
     #print(p_age_allq_Unit)
@@ -1040,15 +1037,15 @@ for (i in seq(1, nrow(Xagency), 1)) {
     #ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
     
     # Plot results - Supervision - basic plot
-    p_age_allq_Sup<- ggplot(age_allq_Sup, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
-      geom_bar(stat="identity", color="black", 
+    p_age_allq_Sup<- ggplot(age_allq_Sup, aes(x=variable, y=Mean, fill=SurveyYear.f)) +
+      geom_bar(stat="identity", color="black",
                position=position_dodge()) +
       geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
                     position=position_dodge(.9))
     
     # Cleaned up bar plot
     p_age_allq_Sup <- p_age_allq_Sup+labs(title="Supervision Average Scores, Mean & 95% Confidence Interval", x="Survey Question", y = "Average Score")+
-      theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
+      theme_minimal()+scale_fill_discrete(name = "Survey Year") +
       theme(axis.text.x=element_text(angle=15, hjust=1))
     
     #print(p_age_allq_Sup)
@@ -1056,15 +1053,15 @@ for (i in seq(1, nrow(Xagency), 1)) {
     #ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
     
     # Plot results - Leadership - basic plot
-    p_age_allq_Lead <- ggplot(age_allq_Lead, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
-      geom_bar(stat="identity", color="black", 
+    p_age_allq_Lead <- ggplot(age_allq_Lead, aes(x=variable, y=Mean, fill=SurveyYear.f)) +
+      geom_bar(stat="identity", color="black",
                position=position_dodge()) +
       geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
                     position=position_dodge(.9))
     
     # Cleaned up bar plot
     p_age_allq_Lead <- p_age_allq_Lead+labs(title="Leadership Average Scores, Mean & 95% Confidence Interval", x="Survey Question", y = "Average Score")+
-      theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
+      theme_minimal()+scale_fill_discrete(name = "Survey Year") +
       theme(axis.text.x=element_text(angle=15, hjust=1))
     
     #print(p_age_allq_Lead)
