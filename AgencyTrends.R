@@ -118,7 +118,7 @@ SOI_subset_only <-subset(SOI_results, variable!="StateComp") #all of the composi
 SOI_state_only <-subset(SOI_results, variable=="StateComp") #only the statewide composite score
 
 # Plot results - basic plot: composite questions
-p_SOI_subset_only<- ggplot(SOI_subset_only, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
+p_SOI_subset_only<- ggplot(SOI_subset_only, aes(x=variable, y=Mean, fill=SurveyYear.f, label = round(Mean, digits=2))) + 
   geom_bar(stat="identity", color="black", 
            position=position_dodge()) +
   geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
@@ -129,11 +129,11 @@ p_SOI_subset_only <- p_SOI_subset_only+labs(title="Survey Section Composite Scor
   theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
   scale_x_discrete(labels=c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership"))  + 
   theme(axis.text.x=element_text(angle=30, hjust=1))+
-  geom_label(data = SOI_subset_only, aes(x=variable, y=Mean, label=round(Mean, digits=2)), position = position_dodge(0.9), label.padding = unit(0.1, "lines"))
+  geom_label(data = SOI_subset_only, aes(x=variable, y=Mean-2, label=round(Mean, digits=2)), position = position_dodge(0.9), label.padding = unit(0.1, "lines"))
   
-#print(p_SOI_subset_only)
+print(p_SOI_subset_only)
 picname <- "1State_Composites.jpg"
-ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
 
 # Plot results - basic plot: Statewide Composite
 p_SOI_state_only<- ggplot(SOI_state_only, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
@@ -149,7 +149,7 @@ p_SOI_state_only <- p_SOI_state_only+labs(title="Statewide Composite Scores, Mea
 
 #print(p_SOI_state_only)
 picname <- "1Statewide.jpg"
-ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
 
 ## Determine % change year to year, and whether it is statistically significant ##
 # Perform t-test
@@ -233,7 +233,7 @@ p_PC_full <- p_PC_full+labs(title="% Change, 2015-2017", x="Survey Focus", y = "
 
 #print(p_PC_full)
 picname <- "1Statewide_PercentChange_Overall.jpg"
-ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
 
 
 ## Show Percent Change - Timeframe of year-to-year change ##
@@ -259,7 +259,7 @@ p_PC_rec <- p_PC_rec+labs(title="% Change, 2016-2017", x="Survey Focus", y = "% 
 
 #print(p_PC_rec)
 picname <- "1Statewide_PercentChange_Recent.jpg"
-ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
 
 
 ## Plot out question-by-question comparisons ##
@@ -332,7 +332,7 @@ p_SOI_allq_Ret <- p_SOI_allq_Ret+labs(title="Retention & Satisfaction Average Sc
 
 #print(p_SOI_allq_Ret)
 picname <- "1Statewide_Retention.jpg"
-ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
 
 # Plot results - Talent Development - basic plot
 p_SOI_allq_Tal<- ggplot(SOI_allq_Tal, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
@@ -349,7 +349,7 @@ p_SOI_allq_Tal <- p_SOI_allq_Tal+labs(title="Talent Development Average Scores, 
 
 #print(p_SOI_allq_Tal)
 picname <- "1Statewide_Talent.jpg"
-ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
 
 # Plot results - Work Environment - basic plot
 p_SOI_allq_Env<- ggplot(SOI_allq_Env, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
@@ -366,7 +366,7 @@ p_SOI_allq_Env <- p_SOI_allq_Env+labs(title="Work Environment Average Scores, Me
 
 #print(p_SOI_allq_Env)
 picname <- "1Statewide_WorkEnvironment.jpg"
-ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
 
 # Plot results - Worker Evaluations - basic plot
 p_SOI_allq_Eval <- ggplot(SOI_allq_Eval, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
@@ -383,7 +383,7 @@ p_SOI_allq_Eval <- p_SOI_allq_Eval+labs(title="Worker Evaluations Average Scores
 
 #print(p_SOI_allq_Eval)
 picname <- "1Statewide_Evaluations.jpg"
-ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
 
 # Plot results - Customer Interactions - basic plot
 p_SOI_allq_Cust<- ggplot(SOI_allq_Cust, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
@@ -400,7 +400,7 @@ p_SOI_allq_Cust <- p_SOI_allq_Cust+labs(title="Customer Interactions Average Sco
 
 #print(p_SOI_allq_Cust)
 picname <- "1Statewide_Customer.jpg"
-ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
 
 # Plot results - Work Unit - basic plot
 p_SOI_allq_Unit<- ggplot(SOI_allq_Unit, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
@@ -417,7 +417,7 @@ p_SOI_allq_Unit <- p_SOI_allq_Unit+labs(title="Work Unit Average Scores, Mean & 
 
 #print(p_SOI_allq_Unit)
 picname <- "1Statwide_WorkUnit.jpg"
-ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
 
 # Plot results - Supervision - basic plot
 p_SOI_allq_Sup<- ggplot(SOI_allq_Sup, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
@@ -434,7 +434,7 @@ p_SOI_allq_Sup <- p_SOI_allq_Sup+labs(title="Supervision Average Scores, Mean & 
 
 #print(p_SOI_allq_Sup)
 picname <- "1Statewide_Supervisor.jpg"
-ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
 
 # Plot results - Leadership - basic plot
 p_SOI_allq_Lead <- ggplot(SOI_allq_Lead, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
@@ -451,7 +451,7 @@ p_SOI_allq_Lead <- p_SOI_allq_Lead+labs(title="Leadership Average Scores, Mean &
 
 #print(p_SOI_allq_Lead)
 picname <- "1Statewide_Leadership.jpg"
-ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
 
 
 ## Agency Level Comparison ##
@@ -583,7 +583,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_Agency_comps)
     picname <- paste(Xagency$abbrevs[i],"_Composite.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
     
     # extract the p-values
     agency_ttest_state <- agevsst_ttest$StateComp$p.value
@@ -620,7 +620,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_Agency_state)
     picname <- paste(Xagency$abbrevs[i],"_StatewideComposite.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
     
     ## Plot out the question results over time ##
     
@@ -675,7 +675,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_age_allq_Ret)
     picname <- paste(Xagency$abbrevs[i],"_Retention.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
     
     # Plot results - Talent Development - basic plot
     p_age_allq_Tal<- ggplot(age_allq_Tal, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
@@ -691,7 +691,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_age_allq_Tal)
     picname <- paste(Xagency$abbrevs[i],"_Talent.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
     
     # Plot results - Work Environment - basic plot
     p_age_allq_Env<- ggplot(age_allq_Env, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
@@ -707,7 +707,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_age_allq_Env)
     picname <- paste(Xagency$abbrevs[i],"_WorkEnvironment.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
     
     # Plot results - Worker Evaluations - basic plot
     p_age_allq_Eval <- ggplot(age_allq_Eval, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
@@ -723,7 +723,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_age_allq_Eval)
     picname <- paste(Xagency$abbrevs[i],"_Evaluations.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
     
     # Plot results - Customer Interactions - basic plot
     p_age_allq_Cust<- ggplot(age_allq_Cust, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
@@ -739,7 +739,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_age_allq_Cust)
     picname <- paste(Xagency$abbrevs[i],"_Customer.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
     
     # Plot results - Work Unit - basic plot
     p_age_allq_Unit<- ggplot(age_allq_Unit, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
@@ -755,7 +755,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_age_allq_Unit)
     picname <- paste(Xagency$abbrevs[i],"_WorkUnit.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
     
     # Plot results - Supervision - basic plot
     p_age_allq_Sup<- ggplot(age_allq_Sup, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
@@ -771,7 +771,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_age_allq_Sup)
     picname <- paste(Xagency$abbrevs[i],"_Supervisor.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
     
     # Plot results - Leadership - basic plot
     p_age_allq_Lead <- ggplot(age_allq_Lead, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
@@ -787,7 +787,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_age_allq_Lead)
     picname <- paste(Xagency$abbrevs[i],"_Leadership.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
   }
  
   ### FOR AGENCIES WITH TWO YEARS OF DATA ### 
@@ -873,7 +873,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_Agency_comps)
     picname <- paste(Xagency$abbrevs[i],"_Composite.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
     
     # extract the p-values
     agency_ttest_state <- c(agevslast_ttest$StateComp$p.value, agevsst_ttest$StateComp$p.value)
@@ -910,7 +910,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_Agency_state)
     picname <- paste(Xagency$abbrevs[i],"_StatewideComposite.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
     
     ## Plot out the question results over time ##
     
@@ -964,7 +964,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_age_allq_Ret)
     picname <- paste(Xagency$abbrevs[i],"_Retention.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
     
     # Plot results - Talent Development - basic plot
     p_age_allq_Tal<- ggplot(age_allq_Tal, aes(x=variable, y=Mean, fill=SurveyYear.f)) +
@@ -980,7 +980,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_age_allq_Tal)
     picname <- paste(Xagency$abbrevs[i],"_Talent.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
     
     # Plot results - Work Environment - basic plot
     p_age_allq_Env<- ggplot(age_allq_Env, aes(x=variable, y=Mean, fill=SurveyYear.f)) +
@@ -996,7 +996,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_age_allq_Env)
     picname <- paste(Xagency$abbrevs[i],"_WorkEnvironment.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
     
     # Plot results - Worker Evaluations - basic plot
     p_age_allq_Eval <- ggplot(age_allq_Eval, aes(x=variable, y=Mean, fill=SurveyYear.f)) +
@@ -1012,7 +1012,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_age_allq_Eval)
     picname <- paste(Xagency$abbrevs[i],"_Evaluations.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
     
     # Plot results - Customer Interactions - basic plot
     p_age_allq_Cust<- ggplot(age_allq_Cust, aes(x=variable, y=Mean, fill=SurveyYear.f)) +
@@ -1028,7 +1028,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_age_allq_Cust)
     picname <- paste(Xagency$abbrevs[i],"_Customer.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
     
     # Plot results - Work Unit - basic plot
     p_age_allq_Unit<- ggplot(age_allq_Unit, aes(x=variable, y=Mean, fill=SurveyYear.f)) +
@@ -1044,7 +1044,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_age_allq_Unit)
     picname <- paste(Xagency$abbrevs[i],"_WorkUnit.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
     
     # Plot results - Supervision - basic plot
     p_age_allq_Sup<- ggplot(age_allq_Sup, aes(x=variable, y=Mean, fill=SurveyYear.f)) +
@@ -1060,7 +1060,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_age_allq_Sup)
     picname <- paste(Xagency$abbrevs[i],"_Supervisor.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
     
     # Plot results - Leadership - basic plot
     p_age_allq_Lead <- ggplot(age_allq_Lead, aes(x=variable, y=Mean, fill=SurveyYear.f)) +
@@ -1076,7 +1076,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_age_allq_Lead)
     picname <- paste(Xagency$abbrevs[i],"_Leadership.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
   }
   
   else if (numyears == 3) {
@@ -1160,7 +1160,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_Agency_comps)
     picname <- paste(Xagency$abbrevs[i],"_Composite.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
     
     # extract the p-values
     agency_ttest_state <- c(agevslast_ttest$StateComp$p.value, agevsst_ttest$StateComp$p.value)
@@ -1197,7 +1197,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_Agency_state)
     picname <- paste(Xagency$abbrevs[i],"_StatewideComposite.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
     
     ## Plot out the question results over time ##
     
@@ -1251,7 +1251,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_age_allq_Ret)
     picname <- paste(Xagency$abbrevs[i],"_Retention.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
     
     # Plot results - Talent Development - basic plot
     p_age_allq_Tal<- ggplot(age_allq_Tal, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
@@ -1267,7 +1267,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_age_allq_Tal)
     picname <- paste(Xagency$abbrevs[i],"_Talent.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
     
     # Plot results - Work Environment - basic plot
     p_age_allq_Env<- ggplot(age_allq_Env, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
@@ -1283,7 +1283,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_age_allq_Env)
     picname <- paste(Xagency$abbrevs[i],"_WorkEnvironment.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
     
     # Plot results - Worker Evaluations - basic plot
     p_age_allq_Eval <- ggplot(age_allq_Eval, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
@@ -1299,7 +1299,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_age_allq_Eval)
     picname <- paste(Xagency$abbrevs[i],"_Evaluations.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
     
     # Plot results - Customer Interactions - basic plot
     p_age_allq_Cust<- ggplot(age_allq_Cust, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
@@ -1315,7 +1315,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_age_allq_Cust)
     picname <- paste(Xagency$abbrevs[i],"_Customer.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
     
     # Plot results - Work Unit - basic plot
     p_age_allq_Unit<- ggplot(age_allq_Unit, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
@@ -1331,7 +1331,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_age_allq_Unit)
     picname <- paste(Xagency$abbrevs[i],"_WorkUnit.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
     
     # Plot results - Supervision - basic plot
     p_age_allq_Sup<- ggplot(age_allq_Sup, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
@@ -1347,7 +1347,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_age_allq_Sup)
     picname <- paste(Xagency$abbrevs[i],"_Supervisor.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
     
     # Plot results - Leadership - basic plot
     p_age_allq_Lead <- ggplot(age_allq_Lead, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
@@ -1363,7 +1363,7 @@ for (i in seq(1, nrow(Xagency), 1)) {
     
     #print(p_age_allq_Lead)
     picname <- paste(Xagency$abbrevs[i],"_Leadership.jpg")
-    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 10, height = 4, units = "in", dpi = 600, limitsize = TRUE)
+    ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
   }
 }
 
