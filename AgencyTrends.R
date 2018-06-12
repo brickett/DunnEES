@@ -129,7 +129,7 @@ p_SOI_subset_only <- p_SOI_subset_only+labs(title="Survey Section Composite Scor
   theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
   scale_x_discrete(labels=c("Retention & Satisfaction", "Talent Development", "Work Environment", "Worker Evaluations", "Customer Interactions", "Work Unit", "Supervision", "Leadership"))  + 
   theme(axis.text.x=element_text(angle=30, hjust=1))+
-  geom_label(data = SOI_subset_only, aes(x=variable, y=Mean-2, label=round(Mean, digits=2)), position = position_dodge(0.9), label.padding = unit(0.1, "lines"))
+  geom_label(data = SOI_subset_only, aes(x=variable, y=Mean-2, label=round(Mean, digits=2)), position = position_dodge(0.9), label.padding = unit(0.1, "lines"), size = 3)
   
 print(p_SOI_subset_only)
 picname <- "1State_Composites.jpg"
@@ -143,9 +143,9 @@ p_SOI_state_only<- ggplot(SOI_state_only, aes(x=variable, y=Mean, fill=SurveyYea
                 position=position_dodge(.9))
 
 # Cleaned up bar plot
-p_SOI_state_only <- p_SOI_state_only+labs(title="Statewide Composite Scores, Mean & 95% Confidence Interval", x="Statewide Cmposite", y = "Average Composite Score")+
+p_SOI_state_only <- p_SOI_state_only+labs(title="Statewide Composite Scores, Mean & 95% Confidence Interval", x="Statewide Composite", y = "Average Composite Score")+
   theme_minimal()+scale_fill_discrete(name = "Survey Year")+
-  geom_label(data = SOI_state_only, aes(x=variable, y=Mean, label=round(Mean, digits=2)), position = position_dodge(0.9), label.padding = unit(0.1, "lines"))
+  geom_label(data = SOI_state_only, aes(x=variable, y=Mean-10, label=round(Mean, digits=2)), position = position_dodge(0.9), label.padding = unit(0.1, "lines"))
 
 #print(p_SOI_state_only)
 picname <- "1Statewide.jpg"
@@ -317,138 +317,66 @@ SOI_allq_Unit <- SOI_allq[c(32:36,83:87,134:138),]
 SOI_allq_Sup <- SOI_allq[c(38:42,89:93,140:144),]
 SOI_allq_Lead <- SOI_allq[c(44:49,95:100,146:151),]
 
-# Plot results - Retention & Satisfaction - basic plot
-p_SOI_allq_Ret<- ggplot(SOI_allq_Ret, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
-  geom_bar(stat="identity", color="black", 
-           position=position_dodge()) +
-  geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
-                position=position_dodge(.9))
+allq_plot_fun <- function(data_in, label_shift, title_in){
+  #Results - basic plot
+  p_SOI_allq_gen<- ggplot(data_in, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
+    geom_bar(stat="identity", color="black", 
+             position=position_dodge()) +
+    geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
+                  position=position_dodge(.9))
+  
+  # Cleaned up bar plot
+  p_SOI_allq_gen <- p_SOI_allq_gen+labs(title=title_in, x="Survey Question", y = "Average Score")+
+    theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
+    theme(axis.text.x=element_text(angle=40, hjust=1, size = 7))+
+    geom_label(data = data_in, aes(x=variable, y=Mean-label_shift, label=round(Mean, digits=2)), position = position_dodge(0.9), label.padding = unit(0.1, "lines"))
+}
 
-# Cleaned up bar plot
-p_SOI_allq_Ret <- p_SOI_allq_Ret+labs(title="Retention & Satisfaction Average Scores, Mean & 95% Confidence Interval", x="Survey Question", y = "Average Score")+
-  theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
-  theme(axis.text.x=element_text(angle=15, hjust=1))+
-  geom_label(data = SOI_allq_Ret, aes(x=variable, y=Mean, label=round(Mean, digits=2)), position = position_dodge(0.9), label.padding = unit(0.1, "lines"))
-
+## PLOT QUESTION RESULTS ##
+# Plot results - Retention & Satisfaction
+p_SOI_allq_Ret <- allq_plot_fun(data_in = SOI_allq_Ret, label_shift = 1, title_in = "Retention & Satisfaction Average Scores, Mean & 95% Confidence Interval")
 #print(p_SOI_allq_Ret)
 picname <- "1Statewide_Retention.jpg"
 ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
 
-# Plot results - Talent Development - basic plot
-p_SOI_allq_Tal<- ggplot(SOI_allq_Tal, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
-  geom_bar(stat="identity", color="black", 
-           position=position_dodge()) +
-  geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
-                position=position_dodge(.9))
-
-# Cleaned up bar plot
-p_SOI_allq_Tal <- p_SOI_allq_Tal+labs(title="Talent Development Average Scores, Mean & 95% Confidence Interval", x="Survey Question", y = "Average Score")+
-  theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
-  theme(axis.text.x=element_text(angle=15, hjust=1))+
-  geom_label(data = SOI_allq_Tal, aes(x=variable, y=Mean, label=round(Mean, digits=2)), position = position_dodge(0.9), label.padding = unit(0.1, "lines"))
-
+# Plot results - Talent Development 
+p_SOI_allq_Tal <- allq_plot_fun(data_in = SOI_allq_Tal, label_shift = 1, title_in = "Talent Development Average Scores, Mean & 95% Confidence Interval")
 #print(p_SOI_allq_Tal)
 picname <- "1Statewide_Talent.jpg"
 ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
 
-# Plot results - Work Environment - basic plot
-p_SOI_allq_Env<- ggplot(SOI_allq_Env, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
-  geom_bar(stat="identity", color="black", 
-           position=position_dodge()) +
-  geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
-                position=position_dodge(.9))
-
-# Cleaned up bar plot
-p_SOI_allq_Env <- p_SOI_allq_Env+labs(title="Work Environment Average Scores, Mean & 95% Confidence Interval", x="Survey Question", y = "Average Score")+
-  theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
-  theme(axis.text.x=element_text(angle=15, hjust=1))+
-  geom_label(data = SOI_allq_Env, aes(x=variable, y=Mean, label=round(Mean, digits=2)), position = position_dodge(0.9), label.padding = unit(0.1, "lines"))
-
+# Plot results - Work Environment
+p_SOI_allq_Env <- allq_plot_fun(data_in = SOI_allq_Env, label_shift = 1, title_in = "Work Environment Average Scores, Mean & 95% Confidence Interval")
 #print(p_SOI_allq_Env)
 picname <- "1Statewide_WorkEnvironment.jpg"
 ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
 
-# Plot results - Worker Evaluations - basic plot
-p_SOI_allq_Eval <- ggplot(SOI_allq_Eval, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
-  geom_bar(stat="identity", color="black", 
-           position=position_dodge()) +
-  geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
-                position=position_dodge(.9))
-
-# Cleaned up bar plot
-p_SOI_allq_Eval <- p_SOI_allq_Eval+labs(title="Worker Evaluations Average Scores, Mean & 95% Confidence Interval", x="Survey Question", y = "Average Score")+
-  theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
-  theme(axis.text.x=element_text(angle=15, hjust=1))+
-  geom_label(data = SOI_allq_Eval, aes(x=variable, y=Mean, label=round(Mean, digits=2)), position = position_dodge(0.9), label.padding = unit(0.1, "lines"))
-
+# Plot results - Worker Evaluations
+p_SOI_allq_Eval <- allq_plot_fun(data_in = SOI_allq_Eval, label_shift = 1, title_in = "Worker Evaluations Average Scores, Mean & 95% Confidence Interval")
 #print(p_SOI_allq_Eval)
 picname <- "1Statewide_Evaluations.jpg"
 ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
 
-# Plot results - Customer Interactions - basic plot
-p_SOI_allq_Cust<- ggplot(SOI_allq_Cust, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
-  geom_bar(stat="identity", color="black", 
-           position=position_dodge()) +
-  geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
-                position=position_dodge(.9))
-
-# Cleaned up bar plot
-p_SOI_allq_Cust <- p_SOI_allq_Cust+labs(title="Customer Interactions Average Scores, Mean & 95% Confidence Interval", x="Survey Question", y = "Average Score")+
-  theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
-  theme(axis.text.x=element_text(angle=15, hjust=1))+
-  geom_label(data = SOI_allq_Cust, aes(x=variable, y=Mean, label=round(Mean, digits=2)), position = position_dodge(0.9), label.padding = unit(0.1, "lines"))
-
+# Plot results - Customer Interactions
+p_SOI_allq_Cust <- allq_plot_fun(data_in = SOI_allq_Cust, label_shift = 1, title_in = "Customer Interactions Average Scores, Mean & 95% Confidence Interval")
 #print(p_SOI_allq_Cust)
 picname <- "1Statewide_Customer.jpg"
 ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
 
-# Plot results - Work Unit - basic plot
-p_SOI_allq_Unit<- ggplot(SOI_allq_Unit, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
-  geom_bar(stat="identity", color="black", 
-           position=position_dodge()) +
-  geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
-                position=position_dodge(.9))
-
-# Cleaned up bar plot
-p_SOI_allq_Unit <- p_SOI_allq_Unit+labs(title="Work Unit Average Scores, Mean & 95% Confidence Interval", x="Survey Question", y = "Average Score")+
-  theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
-  theme(axis.text.x=element_text(angle=15, hjust=1))+
-  geom_label(data = SOI_allq_Unit, aes(x=variable, y=Mean, label=round(Mean, digits=2)), position = position_dodge(0.9), label.padding = unit(0.1, "lines"))
-
+# Plot results - Work Unit
+p_SOI_allq_Unit <- allq_plot_fun(data_in = SOI_allq_Unit, label_shift = 1, title_in = "Work Unit Average Scores, Mean & 95% Confidence Interval")
 #print(p_SOI_allq_Unit)
 picname <- "1Statwide_WorkUnit.jpg"
 ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
 
-# Plot results - Supervision - basic plot
-p_SOI_allq_Sup<- ggplot(SOI_allq_Sup, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
-  geom_bar(stat="identity", color="black", 
-           position=position_dodge()) +
-  geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
-                position=position_dodge(.9))
-
-# Cleaned up bar plot
-p_SOI_allq_Sup <- p_SOI_allq_Sup+labs(title="Supervision Average Scores, Mean & 95% Confidence Interval", x="Survey Question", y = "Average Score")+
-  theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
-  theme(axis.text.x=element_text(angle=15, hjust=1))+
-  geom_label(data = SOI_allq_Sup, aes(x=variable, y=Mean, label=round(Mean, digits=2)), position = position_dodge(0.9), label.padding = unit(0.1, "lines"))
-
+# Plot results - Supervision
+p_SOI_allq_Sup <- allq_plot_fun(data_in = SOI_allq_Sup, label_shift = 1, title_in = "Supervision Average Scores, Mean & 95% Confidence Interval")
 #print(p_SOI_allq_Sup)
 picname <- "1Statewide_Supervisor.jpg"
 ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
 
-# Plot results - Leadership - basic plot
-p_SOI_allq_Lead <- ggplot(SOI_allq_Lead, aes(x=variable, y=Mean, fill=SurveyYear.f)) + 
-  geom_bar(stat="identity", color="black", 
-           position=position_dodge()) +
-  geom_errorbar(aes(ymin=Mean-2*SD, ymax=Mean+2*SD), width=.2,
-                position=position_dodge(.9))
-
-# Cleaned up bar plot
-p_SOI_allq_Lead <- p_SOI_allq_Lead+labs(title="Leadership Average Scores, Mean & 95% Confidence Interval", x="Survey Question", y = "Average Score")+
-  theme_minimal()+scale_fill_discrete(name = "Survey Year") + 
-  theme(axis.text.x=element_text(angle=15, hjust=1))+
-  geom_label(data = SOI_allq_Lead, aes(x=variable, y=Mean, label=round(Mean, digits=2)), position = position_dodge(0.9), label.padding = unit(0.1, "lines"))
-
+# Plot results - Leadership
+p_SOI_allq_Lead <- allq_plot_fun(data_in = SOI_allq_Lead, label_shift = 1, title_in = "Leadership Average Scores, Mean & 95% Confidence Interval")
 #print(p_SOI_allq_Lead)
 picname <- "1Statewide_Leadership.jpg"
 ggsave(picname, plot = last_plot(), device = "jpeg", path = NULL, width = 12, height = 6, units = "in", dpi = 600, limitsize = TRUE)
