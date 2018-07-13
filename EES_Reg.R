@@ -60,3 +60,26 @@ write.csv(tidy_Leader, "tidy_Leader.csv")
 State <- summary(lm(StateComp ~ Tenure.f + Union.f + Race.f + Sex.f + Agency.f, data = df))
 tidy_State <- tidy(State)
 write.csv(tidy_State, "tidy_State.csv")
+
+#Check residuals
+plot(Retention$residuals)
+plot(Talent$residuals)
+plot(Enviro$residuals)
+plot(Eval$residuals)
+plot(Customer$residuals)
+plot(Unit$residuals)
+plot(Super$residuals)
+plot(Leader$residuals)
+plot(State$residuals)
+
+#print the r-squared values
+print(Retention$r.squared)
+print(Talent$r.squared)
+print(Enviro$r.squared)
+print(Eval$r.squared)
+print(Customer$r.squared)
+print(Unit$r.squared)
+print(Super$r.squared)
+print(Leader$r.squared)
+print(State$r.squared)
+
